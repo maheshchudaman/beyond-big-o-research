@@ -371,8 +371,9 @@ def build():
         f"tests, execution configuration, raw CSV records and analysis scripts. The raw combined CSV contains "
         f"{METRICS['record_count']} records (SHA-256: {METRICS['raw_sha256']}); the supplementary construct-validity "
         f"check adds {METRICS['linked_fwd_supplement']['record_count']} further records (SHA-256: "
-        f"{METRICS['linked_fwd_supplement']['raw_sha256']}). Repository URL and Zenodo DOI are withheld for "
-        f"double-blind review and will be provided upon acceptance."
+        f"{METRICS['linked_fwd_supplement']['raw_sha256']}). The repository is publicly available at "
+        f"https://github.com/maheshchudaman/beyond-big-o-research and is archived on Zenodo with concept DOI "
+        f"10.5281/zenodo.22089928."
     )
     p = para(doc, style="Body Text")
     p.add_run("Generative AI Use: ").bold = True
