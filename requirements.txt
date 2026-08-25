@@ -1,0 +1,2 @@
+# The core framework uses only the Python standard library.
+# Add scipy, pandas and matplotlib later if the final statistical plan needs them.

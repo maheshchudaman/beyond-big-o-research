@@ -1,0 +1,378 @@
+{
+  "record_count": 240,
+  "raw_sha256": "c86df6732b7e5e78e7a71d6b72ae65535b648b10ccb4c39255a4652018ed3dff",
+  "n25000": {
+    "array": {
+      "insert": {
+        "cpp": {
+          "median_ns": 6562.5,
+          "median_ms": 0.0065625,
+          "bootstrap_median_ci95_ns": [
+            5959.0,
+            7625.0
+          ],
+          "mean_ns": 6908.4,
+          "std_ns": 1086.6423514662035
+        },
+        "python": {
+          "median_ns": 31208.5,
+          "median_ms": 0.0312085,
+          "bootstrap_median_ci95_ns": [
+            29500.0,
+            33500.0
+          ],
+          "mean_ns": 31816.6,
+          "std_ns": 3131.9629698392737
+        },
+        "python_to_cpp_median_ratio": 4.755580952380952,
+        "cliffs_delta_python_vs_cpp": 1.0
+      },
+      "search": {
+        "cpp": {
+          "median_ns": 1425270.5,
+          "median_ms": 1.4252705,
+          "bootstrap_median_ci95_ns": [
+            1424708.0,
+            1435958.0
+          ],
+          "mean_ns": 1430195.5,
+          "std_ns": 8789.541566227697
+        },
+        "python": {
+          "median_ns": 16388583.5,
+          "median_ms": 16.3885835,
+          "bootstrap_median_ci95_ns": [
+            16212500.0,
+            16683979.0
+          ],
+          "mean_ns": 16482383.4,
+          "std_ns": 350063.87915579067
+        },
+        "python_to_cpp_median_ratio": 11.498577638420215,
+        "cliffs_delta_python_vs_cpp": 1.0
+      },
+      "delete": {
+        "cpp": {
+          "median_ns": 1071625.5,
+          "median_ms": 1.0716255,
+          "bootstrap_median_ci95_ns": [
+            1068583.0,
+            1086521.0
+          ],
+          "mean_ns": 1077471,
+          "std_ns": 14908.611292359416
+        },
+        "python": {
+          "median_ns": 16400834.0,
+          "median_ms": 16.400834,
+          "bootstrap_median_ci95_ns": [
+            16271479.0,
+            16652396.0
+          ],
+          "mean_ns": 16507312.8,
+          "std_ns": 330209.94629504695
+        },
+        "python_to_cpp_median_ratio": 15.304632075291227,
+        "cliffs_delta_python_vs_cpp": 1.0
+      },
+      "traverse": {
+        "cpp": {
+          "median_ns": 958.0,
+          "median_ms": 0.000958,
+          "bootstrap_median_ci95_ns": [
+            917.0,
+            958.0
+          ],
+          "mean_ns": 945.6,
+          "std_ns": 20.200110010701536
+        },
+        "python": {
+          "median_ns": 87833.5,
+          "median_ms": 0.0878335,
+          "bootstrap_median_ci95_ns": [
+            86583.5,
+            89500.0
+          ],
+          "mean_ns": 88129.1,
+          "std_ns": 1784.7834882696557
+        },
+        "python_to_cpp_median_ratio": 91.68423799582463,
+        "cliffs_delta_python_vs_cpp": 1.0
+      }
+    },
+    "linked": {
+      "insert": {
+        "cpp": {
+          "median_ns": 215208.5,
+          "median_ms": 0.2152085,
+          "bootstrap_median_ci95_ns": [
+            208833.0,
+            224833.0
+          ],
+          "mean_ns": 219375,
+          "std_ns": 15093.846045473118
+        },
+        "python": {
+          "median_ns": 3375958.5,
+          "median_ms": 3.3759585,
+          "bootstrap_median_ci95_ns": [
+            3349584.0,
+            4354417.0
+          ],
+          "mean_ns": 3856196,
+          "std_ns": 1055339.136396974
+        },
+        "python_to_cpp_median_ratio": 15.686919893963296,
+        "cliffs_delta_python_vs_cpp": 1.0
+      },
+      "search": {
+        "cpp": {
+          "median_ns": 5712146.0,
+          "median_ms": 5.712146,
+          "bootstrap_median_ci95_ns": [
+            5672166.0,
+            5919750.0
+          ],
+          "mean_ns": 5882529.3,
+          "std_ns": 381271.7499786588
+        },
+        "python": {
+          "median_ns": 123330291.5,
+          "median_ms": 123.3302915,
+          "bootstrap_median_ci95_ns": [
+            122650938.0,
+            127568771.0
+          ],
+          "mean_ns": 125406971,
+          "std_ns": 5081096.58401712
+        },
+        "python_to_cpp_median_ratio": 21.590885719657727,
+        "cliffs_delta_python_vs_cpp": 1.0
+      },
+      "delete": {
+        "cpp": {
+          "median_ns": 3742375.0,
+          "median_ms": 3.742375,
+          "bootstrap_median_ci95_ns": [
+            3695708.0,
+            3816500.0
+          ],
+          "mean_ns": 3750095.9,
+          "std_ns": 60677.298257896895
+        },
+        "python": {
+          "median_ns": 76787937.0,
+          "median_ms": 76.787937,
+          "bootstrap_median_ci95_ns": [
+            76469500.0,
+            77531000.5
+          ],
+          "mean_ns": 77179141.6,
+          "std_ns": 1223595.6024844882
+        },
+        "python_to_cpp_median_ratio": 20.518504158455528,
+        "cliffs_delta_python_vs_cpp": 1.0
+      },
+      "traverse": {
+        "cpp": {
+          "median_ns": 29729.0,
+          "median_ms": 0.029729,
+          "bootstrap_median_ci95_ns": [
+            29271.5,
+            31020.5
+          ],
+          "mean_ns": 30137.6,
+          "std_ns": 1302.2492678268457
+        },
+        "python": {
+          "median_ns": 740562.5,
+          "median_ms": 0.7405625,
+          "bootstrap_median_ci95_ns": [
+            725604.5,
+            763208.5
+          ],
+          "mean_ns": 807037.6,
+          "std_ns": 214222.86945619146
+        },
+        "python_to_cpp_median_ratio": 24.910440983551414,
+        "cliffs_delta_python_vs_cpp": 1.0
+      }
+    },
+    "hash": {
+      "insert": {
+        "cpp": {
+          "median_ns": 277937.5,
+          "median_ms": 0.2779375,
+          "bootstrap_median_ci95_ns": [
+            274500.0,
+            284291.0
+          ],
+          "mean_ns": 280316.6,
+          "std_ns": 7522.04830555555
+        },
+        "python": {
+          "median_ns": 619979.5,
+          "median_ms": 0.6199795,
+          "bootstrap_median_ci95_ns": [
+            612166.5,
+            732708.0
+          ],
+          "mean_ns": 657737.5,
+          "std_ns": 68215.36090818059
+        },
+        "python_to_cpp_median_ratio": 2.2306435799415336,
+        "cliffs_delta_python_vs_cpp": 1.0
+      },
+      "search": {
+        "cpp": {
+          "median_ns": 708.0,
+          "median_ms": 0.000708,
+          "bootstrap_median_ci95_ns": [
+            708.0,
+            709.0
+          ],
+          "mean_ns": 716.7,
+          "std_ns": 26.461922328760117
+        },
+        "python": {
+          "median_ns": 9604.5,
+          "median_ms": 0.0096045,
+          "bootstrap_median_ci95_ns": [
+            9541.0,
+            10208.0
+          ],
+          "mean_ns": 9941.6,
+          "std_ns": 785.1501201115052
+        },
+        "python_to_cpp_median_ratio": 13.565677966101696,
+        "cliffs_delta_python_vs_cpp": 1.0
+      },
+      "delete": {
+        "cpp": {
+          "median_ns": 4895.5,
+          "median_ms": 0.0048955,
+          "bootstrap_median_ci95_ns": [
+            4875.0,
+            4959.0
+          ],
+          "mean_ns": 4908.5,
+          "std_ns": 38.572442667445024
+        },
+        "python": {
+          "median_ns": 9104.5,
+          "median_ms": 0.0091045,
+          "bootstrap_median_ci95_ns": [
+            9000.0,
+            9312.5
+          ],
+          "mean_ns": 9162.5,
+          "std_ns": 179.49079208818608
+        },
+        "python_to_cpp_median_ratio": 1.8597691757736696,
+        "cliffs_delta_python_vs_cpp": 1.0
+      },
+      "traverse": {
+        "cpp": {
+          "median_ns": 29500.0,
+          "median_ms": 0.0295,
+          "bootstrap_median_ci95_ns": [
+            29167.0,
+            29625.0
+          ],
+          "mean_ns": 29433.3,
+          "std_ns": 391.08681900570366
+        },
+        "python": {
+          "median_ns": 108667.0,
+          "median_ms": 0.108667,
+          "bootstrap_median_ci95_ns": [
+            107520.5,
+            110791.5
+          ],
+          "mean_ns": 109174.9,
+          "std_ns": 2200.810479497648
+        },
+        "python_to_cpp_median_ratio": 3.683627118644068,
+        "cliffs_delta_python_vs_cpp": 1.0
+      }
+    }
+  },
+  "scaling_exponents_5000_25000": {
+    "array": {
+      "insert": {
+        "cpp": 0.7785511084604942,
+        "python": 1.013860918163011
+      },
+      "search": {
+        "cpp": 1.9886426546490006,
+        "python": 1.997774101374922
+      },
+      "delete": {
+        "cpp": 1.8730384295669225,
+        "python": 1.891148139380065
+      },
+      "traverse": {
+        "cpp": 0.9489708714265668,
+        "python": 0.9727422155932122
+      }
+    },
+    "linked": {
+      "insert": {
+        "cpp": 1.0060446429998458,
+        "python": 1.013786673531336
+      },
+      "search": {
+        "cpp": 1.9134761130614857,
+        "python": 1.9930570780893493
+      },
+      "delete": {
+        "cpp": 1.8880468843479403,
+        "python": 1.8450290381801586
+      },
+      "traverse": {
+        "cpp": 0.8369871322932148,
+        "python": 0.9741843968906865
+      }
+    },
+    "hash": {
+      "insert": {
+        "cpp": 0.9516744914603376,
+        "python": 1.1217124429887275
+      },
+      "search": {
+        "cpp": 0.8993504956547917,
+        "python": 0.9685907863017785
+      },
+      "delete": {
+        "cpp": 0.9997462126240384,
+        "python": 1.0246763768352973
+      },
+      "traverse": {
+        "cpp": 0.8956002410774067,
+        "python": 0.9437827793255513
+      }
+    }
+  },
+  "submicrosecond_groups": [
+    [
+      "cpp",
+      "array",
+      25000,
+      "traverse",
+      958.0
+    ],
+    [
+      "cpp",
+      "hash",
+      25000,
+      "search",
+      708.0
+    ]
+  ],
+  "median_group_cv": 0.040045315133575024,
+  "max_group_cv": 1.2911101696823128,
+  "language_ratio_range_n25000": [
+    1.8597691757736696,
+    91.68423799582463
+  ]
+}

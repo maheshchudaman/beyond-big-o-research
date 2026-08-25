@@ -1,0 +1,30 @@
+[
+  {
+    "file": "dataset_1000.txt",
+    "n": 1000,
+    "queries": 10,
+    "deletes": 10,
+    "sha256": "e7540f6b5270e870b2747e298d649402eb862449268de7044e382dda2134c0b6"
+  },
+  {
+    "file": "dataset_5000.txt",
+    "n": 5000,
+    "queries": 50,
+    "deletes": 50,
+    "sha256": "8b40eaa13e85e85793a9b34986dcef1ac2ce88d2b3a69c994093ba8ce65b57db"
+  },
+  {
+    "file": "dataset_10000.txt",
+    "n": 10000,
+    "queries": 100,
+    "deletes": 100,
+    "sha256": "c66689d7d3435d3b65949b87addbba76002bb93956c10224632bd9e5f7c2dc2c"
+  },
+  {
+    "file": "dataset_25000.txt",
+    "n": 25000,
+    "queries": 250,
+    "deletes": 250,
+    "sha256": "571f683b5d67595af08dc2fd86db580543fddaea499eff947bc0997eb6493c17"
+  }
+]

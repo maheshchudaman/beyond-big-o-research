@@ -1,0 +1,13 @@
+structure,operation,cpp_median_ms,python_median_ms,python_cpp_ratio,cliffs_delta
+array,insert,0.006562,0.031209,4.76,1.00
+array,search,1.425271,16.388583,11.50,1.00
+array,delete,1.071625,16.400834,15.30,1.00
+array,traverse,0.000958,0.087833,91.68,1.00
+linked,insert,0.215208,3.375958,15.69,1.00
+linked,search,5.712146,123.330292,21.59,1.00
+linked,delete,3.742375,76.787937,20.52,1.00
+linked,traverse,0.029729,0.740563,24.91,1.00
+hash,insert,0.277938,0.619980,2.23,1.00
+hash,search,0.000708,0.009605,13.57,1.00
+hash,delete,0.004895,0.009104,1.86,1.00
+hash,traverse,0.029500,0.108667,3.68,1.00

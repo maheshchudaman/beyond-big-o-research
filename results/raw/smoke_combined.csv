@@ -1,0 +1,7 @@
+language,structure,dataset,n,repeat,insert_ns,search_ns,delete_ns,traverse_ns,hits,checksum
+python,hash,dataset_1000.txt,1000,0,26292,1167,750,7292,5,494272
+python,array,dataset_1000.txt,1000,0,2542,27708,36500,5167,5,494272
+cpp,linked,dataset_1000.txt,1000,0,38084,13209,10875,1583,5,494272
+python,linked,dataset_1000.txt,1000,0,143916,320875,233084,40875,5,494272
+cpp,array,dataset_1000.txt,1000,0,291,3709,3458,83,5,494272
+cpp,hash,dataset_1000.txt,1000,0,20958,42,333,1250,5,494272

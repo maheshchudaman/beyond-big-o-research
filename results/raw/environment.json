@@ -1,0 +1,27 @@
+{
+  "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+  "machine": "arm64",
+  "python": "3.13.5 (v3.13.5:6cb20a219a8, Jun 11 2025, 12:23:45) [Clang 16.0.0 (clang-1600.0.26.6)]",
+  "languages_completed": [
+    "cpp",
+    "python"
+  ],
+  "config": {
+    "seed": 20260823,
+    "sizes": [
+      1000,
+      5000,
+      10000,
+      25000
+    ],
+    "query_fraction": 0.01,
+    "delete_fraction": 0.01,
+    "repeats": 10,
+    "warmups": 3,
+    "structures": [
+      "array",
+      "linked",
+      "hash"
+    ]
+  }
+}

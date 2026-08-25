@@ -1,0 +1,11 @@
+language,structure,dataset,n,repeat,insert_ns,search_ns,delete_ns,traverse_ns,hits,checksum
+python,array,dataset_1000.txt,1000,0,1375,29625,38791,5292,5,494272
+python,array,dataset_1000.txt,1000,1,833,29167,38666,5208,5,494272
+python,array,dataset_1000.txt,1000,2,750,29250,38500,5041,5,494272
+python,array,dataset_1000.txt,1000,3,667,28625,37875,5166,5,494272
+python,array,dataset_1000.txt,1000,4,709,28292,37167,5209,5,494272
+python,array,dataset_1000.txt,1000,5,708,28416,37291,5083,5,494272
+python,array,dataset_1000.txt,1000,6,667,28333,37125,5083,5,494272
+python,array,dataset_1000.txt,1000,7,667,28292,37250,4875,5,494272
+python,array,dataset_1000.txt,1000,8,667,28500,37083,4916,5,494272
+python,array,dataset_1000.txt,1000,9,666,28250,37166,4875,5,494272

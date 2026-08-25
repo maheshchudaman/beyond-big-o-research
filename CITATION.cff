@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this benchmark framework, please cite the repository and resulting paper."
+title: "Beyond Big-O: Cross-Language Data-Structure Benchmark Framework"
+type: software
+authors:
+  - family-names: Patil
+    given-names: Mahesh
+version: 0.1.0
+date-released: 2026-08-23
+license: MIT
+

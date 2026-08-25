@@ -1,0 +1,10 @@
+{
+  "seed": 20260823,
+  "sizes": [1000, 5000, 10000, 25000],
+  "query_fraction": 0.01,
+  "delete_fraction": 0.01,
+  "repeats": 10,
+  "warmups": 3,
+  "structures": ["array", "linked", "hash"]
+}
+
