@@ -69,6 +69,19 @@ def para(doc, text="", style=None, align=None, space_after=None):
     return p
 
 
+def corresponding_author_note(doc, text):
+    # The template's "sponsors" style carries a floating w:framePr + top border
+    # (it was designed for a fixed sponsor-logo box) — using it here detaches
+    # this line from normal flow in real Word, even though it looks fine in
+    # LibreOffice. Build a plain centered paragraph instead.
+    p = doc.add_paragraph()
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    r = p.add_run(text)
+    r.italic = True
+    r.font.size = Pt(8)
+    return p
+
+
 def set_section(section, *, cols=1, margin=TWOCOL_MARGIN, header=None, footer=None):
     section.left_margin = margin
     section.right_margin = margin
@@ -181,7 +194,7 @@ def build():
     para(doc, "Mahesh Patil¹*, Varun Patil²", style="Author")
     para(doc, "Shah & Anchor Kutchhi Engineering College, Mumbai, Maharashtra, India¹", style="Affiliation")
     para(doc, "Shah & Anchor Kutchhi Engineering College, Mumbai, Maharashtra, India²", style="Affiliation")
-    para(doc, "* Corresponding author (mahesh.patil@sakec.ac.in)", style="sponsors")
+    corresponding_author_note(doc, "* Corresponding author (mahesh.patil@sakec.ac.in)")
 
     # ---- Main two-column body ----
     new_section(doc, cols=2)
