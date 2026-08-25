@@ -356,7 +356,7 @@ def build():
 
     # Component heads (unnumbered)
     para(doc, "Acknowledgment", style="Heading 5")
-    para(doc, "This work received no dedicated external funding. [Add any acknowledgments of individuals, institutions, or resources here, or state “Not applicable” if none.]", style="Body Text")
+    para(doc, "[Add any acknowledgments of individuals, institutions, or resources here, or state “Not applicable” if none.]", style="Body Text")
 
     para(doc, "Declarations", style="Heading 5")
     p = para(doc, style="Body Text")
@@ -364,7 +364,7 @@ def build():
     p.add_run("[Confirm and state, e.g., “The authors declare no conflict of interest.”]")
     p = para(doc, style="Body Text")
     p.add_run("Funding: ").bold = True
-    p.add_run("[Confirm and state, e.g., “This research received no external funding.”]")
+    p.add_run("This research received no external funding.")
     p = para(doc, style="Body Text")
     p.add_run("Data and Code Availability: ").bold = True
     p.add_run(
@@ -372,8 +372,8 @@ def build():
         f"tests, execution configuration, raw CSV records and analysis scripts. The raw combined CSV contains "
         f"{METRICS['record_count']} records (SHA-256: {METRICS['raw_sha256']}); the supplementary construct-validity "
         f"check adds {METRICS['linked_fwd_supplement']['record_count']} further records (SHA-256: "
-        f"{METRICS['linked_fwd_supplement']['raw_sha256']}). Repository: "
-        f"https://github.com/maheshchudaman/beyond-big-o-research (Zenodo concept DOI: 10.5281/zenodo.22089928)."
+        f"{METRICS['linked_fwd_supplement']['raw_sha256']}). Repository URL and Zenodo DOI are withheld for "
+        f"double-blind review and will be provided upon acceptance."
     )
     p = para(doc, style="Body Text")
     p.add_run("Generative AI Use: ").bold = True
