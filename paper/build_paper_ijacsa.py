@@ -178,8 +178,9 @@ def build():
     para(doc, "Beyond Big-O: A Reproducible Apple-Silicon Pilot Study of Runtime Performance for Common Data Structures in Python and C++", style="01_Paper Title")
 
     new_section(doc, cols=1, header=Twips(720), footer=Twips(720))
-    para(doc, "Mahesh Patil¹*, Varun Patil¹", style="Author")
+    para(doc, "Mahesh Patil¹*, Varun Patil²", style="Author")
     para(doc, "Shah & Anchor Kutchhi Engineering College, Mumbai, Maharashtra, India¹", style="Affiliation")
+    para(doc, "Shah & Anchor Kutchhi Engineering College, Mumbai, Maharashtra, India²", style="Affiliation")
     para(doc, "* Corresponding author (mahesh.patil@sakec.ac.in)", style="sponsors")
 
     # ---- Main two-column body ----
