@@ -292,7 +292,7 @@ def build():
     add_para(doc, "Beyond Big-O: A Reproducible Apple-Silicon Pilot Study of Runtime Performance for Common Data Structures in Python and C++", size=22, bold=True, color=DARK_BLUE, after=9, line=1.08)
     add_para(doc, "Mahesh Patil and Student Research Team", size=12, bold=True, color=MID_BLUE, after=2)
     add_para(doc, "Affiliation to be added before submission", size=10, italic=True, color=MUTED, after=12)
-    add_note(doc, "Draft status", "Prepared from measurements executed in Codex on 23 August 2026. This manuscript is intended for internal academic review and methodological refinement before journal submission.")
+    add_note(doc, "Draft status", "Prepared from measurements executed in Codex on 23 August 2026, with a supplementary construct-validity check (Section 4.5) added on 25 August 2026. This manuscript is intended for internal academic review and methodological refinement before journal submission.")
 
     heading(doc, "Abstract", 1)
     abstract = (
@@ -302,16 +302,19 @@ def build():
         "traversal workloads in Python 3.13 and optimized C++17. Experiments were executed on an Apple M2 MacBook Air "
         "with 8 GB memory and macOS 26.5.2. Four input sizes (1,000-25,000) were tested using three warm-ups and ten "
         "recorded repetitions, yielding 240 validated measurement records. At n = 25,000, median Python runtimes were "
-        "1.86-91.68 times the corresponding C++ medians across the twelve structure-operation combinations. Batched "
-        "search and deletion for sequential structures exhibited empirical scaling exponents of approximately "
-        "1.85-2.00 because both the collection size and the number of operations increased with n; hash workloads were "
-        "closer to linear. All implementations produced identical search-hit counts and post-deletion checksums. The "
-        "findings support teaching Big-O together with implementation-aware measurement, while the single-machine scope, "
-        "absence of Java and hardware-counter data, and submicrosecond C++ measurements make the work a pilot rather than "
-        "a final general-purpose benchmark."
+        "1.86-91.68 times the corresponding C++ medians across the twelve structure-operation combinations; the upper "
+        "end of this range reflects a submicrosecond, resolution-limited C++ traversal median (Section 3.4) rather than "
+        "a stable absolute figure. Batched search and deletion for sequential structures exhibited empirical scaling "
+        "exponents of approximately 1.85-2.00 because both the collection size and the number of operations increased "
+        "with n; hash workloads were closer to linear. All implementations produced identical search-hit counts and "
+        "post-deletion checksums, including a supplementary re-run of the linked benchmark using a singly-linked "
+        "std::forward_list to match the Python implementation's representation, which reproduced the same pattern of "
+        "ratios (Section 4.5) rather than narrowing it. The findings support teaching Big-O together with "
+        "implementation-aware measurement, while the single-machine scope, absence of Java and hardware-counter data, "
+        "and submicrosecond C++ measurements make the work a pilot rather than a final general-purpose benchmark."
     )
     add_para(doc, abstract, align=WD_ALIGN_PARAGRAPH.JUSTIFY)
-    add_rich_para(doc, [("Keywords: ", {"bold": True}), ("data structures; Big-O; empirical algorithmics; Python; C++; microbenchmarking; reproducibility", {})], align=WD_ALIGN_PARAGRAPH.LEFT)
+    add_rich_para(doc, [("Keywords: ", {"bold": True}), ("data structures; Big-O; empirical algorithmics; Python; C++; microbenchmarking; reproducibility; construct validity", {})], align=WD_ALIGN_PARAGRAPH.LEFT)
 
     heading(doc, "1. Introduction", 1)
     add_para(doc, "Big-O notation provides a machine-independent description of growth as input size increases. It is indispensable for algorithm design, yet it intentionally suppresses constant factors, representation costs and hardware effects [1]. Consequently, two implementations with the same asymptotic class can differ substantially in observed runtime, while a theoretically favourable structure may carry a higher construction or traversal cost for a particular workload.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
@@ -328,6 +331,7 @@ def build():
     bullet(doc, "A reproducible execution pipeline with correctness checks, raw-data hashing and environment metadata.")
     bullet(doc, "An empirical distinction between per-operation complexity and the complexity of a batch whose operation count also grows with n.")
     bullet(doc, "A transparent account of measurement-resolution, implementation-equivalence and external-validity limitations.")
+    bullet(doc, "An empirical test of whether the C++/Python linked-container mismatch inflates the observed language gap, rather than leaving that concern as an unverified caveat.")
 
     heading(doc, "2. Background and Related Work", 1)
     add_para(doc, "The analysis of algorithms separates growth rate from implementation detail [1]. Experimental algorithmics complements that abstraction by examining implementations on specified workloads and machines. Algorithm engineering has been described as a methodology connecting design, implementation, experimentation and refinement [3]. This perspective motivates reporting sufficient detail to reproduce not only the code but also the experimental conditions.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
@@ -350,7 +354,7 @@ def build():
     add_table(doc, "Table 1. Recorded execution environment.", ["Item", "Recorded value"], env_rows, [2400, 6960], 9.4)
 
     heading(doc, "3.2 Structures and workload", 2)
-    add_para(doc, "The experiment used three abstract structures. The dynamic-array condition used Python list and C++ std::vector<int>; the linked condition used a custom Python singly linked list and C++ std::list<int>; and the hash condition used Python dict and C++ std::unordered_map<int,int>. Inputs contained unique integers in a deterministic shuffled order.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
+    add_para(doc, "The experiment used three abstract structures. The dynamic-array condition used Python list [9] and C++ std::vector<int> [10]; the linked condition used a custom Python singly linked list and C++ std::list<int>; and the hash condition used Python dict and C++ std::unordered_map<int,int>. Inputs contained unique integers in a deterministic shuffled order.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
     method_rows = [
         ["Input size", "1,000; 5,000; 10,000; 25,000"],
         ["Build", "Construct the structure from all n values"],
@@ -370,7 +374,7 @@ def build():
     add_note(doc, "Measurement caveat", "Some optimized C++ workloads completed in less than one microsecond, and the C++ hash-search median at n = 1,000 was recorded as zero. Such values are below a dependable single-shot timing range and are treated as resolution-limited rather than literal zero-cost operations.", risk=True)
 
     heading(doc, "3.5 Analysis", 2)
-    add_para(doc, "The primary summary was the median across ten repetitions, with the mean, standard deviation and non-parametric bootstrap interval retained in the generated analysis file. Coefficient of variation (CV) was used to describe group dispersion. Python-to-C++ median ratios at n = 25,000 were calculated descriptively; Cliff's delta was also computed. Scaling exponents between n = 5,000 and n = 25,000 were estimated as log(T2/T1) / log(n2/n1). No causal language claim is made because language and container representation were not independently manipulated.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
+    add_para(doc, "The primary summary was the median across ten repetitions, with the mean, standard deviation and non-parametric bootstrap interval retained in the generated analysis file [8]. Coefficient of variation (CV) was used to describe group dispersion. Python-to-C++ median ratios at n = 25,000 were calculated descriptively; Cliff's delta was also computed. Scaling exponents between n = 5,000 and n = 25,000 were estimated as log(T2/T1) / log(n2/n1). No causal language claim is made because language and container representation were not independently manipulated.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
 
     heading(doc, "4. Results", 1)
     heading(doc, "4.1 Correctness and measurement stability", 2)
@@ -397,6 +401,19 @@ def build():
     heading(doc, "4.4 Deletion and traversal patterns", 2)
     add_para(doc, "Array and linked deletion workloads also approached quadratic scaling because 1% of n keys were deleted and each deletion required sequential location; estimated exponents ranged from 1.85 to 1.89 for linked deletion and 1.87 to 1.89 for array deletion. Hash deletion remained close to linear at 1.00 in C++ and 1.02 in Python. Traversal generally approached linear growth, with exponents between 0.84 and 0.97 across the structures and languages. These patterns are more defensible than the smallest absolute timings because they rely on changes across larger workloads.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
 
+    heading(doc, "4.5 Construct-validity check: a singly-linked C++ comparison", 2)
+    add_para(doc, "Section 6.2 notes a representational mismatch in the linked condition: the C++ side used std::list, which is typically doubly linked, while the Python side used a custom singly linked list. To test whether this mismatch inflates the reported ratios rather than merely being noted as a caveat, the C++ linked benchmark was re-run using std::forward_list, a singly-linked container with the same single-next-pointer structure as the Python implementation, across all four input sizes with the same three-warm-up, ten-repetition protocol. Every forward_list run reproduced the same search-hit count and post-deletion checksum as both the original std::list run and the Python run at every input size, verified programmatically before the comparison was computed.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
+    fwd = METRICS["linked_fwd_supplement"]["n25000"]
+    fwd_rows = []
+    for operation in ("insert", "search", "delete", "traverse"):
+        entry = fwd[operation]
+        fwd_rows.append([
+            operation.title(), fmt_ms(entry["cpp_list_median_ms"]), fmt_ms(entry["cpp_forward_list_median_ms"]),
+            fmt_ms(entry["python_median_ms"]), f"{entry['python_to_forward_list_ratio']:.2f}x",
+        ])
+    add_table(doc, "Table 4. Construct-validity check: median linked-structure runtime at n = 25,000 using a singly-linked C++ container matched to the Python implementation.", ["Operation", "C++ std::list", "C++ std::forward_list", "Python 3.13", "Python/forward_list"], fwd_rows, [1600, 1900, 2000, 2000, 1860], 8.6)
+    add_para(doc, f"Matching the C++ container's linkage discipline to the Python implementation did not narrow the measured language gap. The Python-to-C++ ratio was higher under the forward_list comparison than under std::list for search ({fwd['search']['python_to_forward_list_ratio']:.2f}x versus {fwd['search']['python_to_list_ratio']:.2f}x), deletion ({fwd['delete']['python_to_forward_list_ratio']:.2f}x versus {fwd['delete']['python_to_list_ratio']:.2f}x) and traversal ({fwd['traverse']['python_to_forward_list_ratio']:.2f}x versus {fwd['traverse']['python_to_list_ratio']:.2f}x), and only slightly lower for insertion ({fwd['insert']['python_to_forward_list_ratio']:.2f}x versus {fwd['insert']['python_to_list_ratio']:.2f}x). Between n = 5,000 and n = 25,000, the forward_list search and deletion exponents were {METRICS['linked_fwd_supplement']['scaling_exponents_5000_25000']['search']:.2f} and {METRICS['linked_fwd_supplement']['scaling_exponents_5000_25000']['delete']:.2f} respectively, consistent with the batch-scaling explanation given in Section 5.1 for std::list. The construct-validity concern raised in Section 6.2 therefore does not appear to be inflating the reported Python/C++ ratios for the linked condition, though it remains a caveat for claims about a specific container's internal performance rather than about Python versus C++ generally.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
+
     heading(doc, "5. Discussion", 1)
     heading(doc, "5.1 Big-O explained, not contradicted", 2)
     add_para(doc, "The results do not show a failure of asymptotic analysis. Instead, they demonstrate why the unit of analysis must be stated carefully. A single sequential search is O(n), but this experiment schedules 0.01n searches, creating an O(n^2) batch. A hash lookup is expected O(1) on average, and the corresponding O(n) batch grew close to linearly. The empirical exponents therefore connect measured behaviour to the composed workload rather than replacing theory.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
@@ -412,7 +429,7 @@ def build():
     add_para(doc, "Background activity, thermal conditions and operating-system scheduling were not instrumented. Although jobs were shuffled and measurements were repeated, the study did not pin processes to performance cores. Extremely short C++ operations are vulnerable to timer quantisation and clock-call overhead. A revised benchmark should batch pure operations until each timed interval exceeds a predefined duration and should separately quantify timing overhead.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
 
     heading(doc, "6.2 Construct validity", 2)
-    add_para(doc, "The structures are functionally comparable but not internally identical. Python's custom singly linked list differs from C++ std::list, which is typically doubly linked. Python list holds object references, whereas std::vector<int> stores primitive integers contiguously. Consequently, the experiment evaluates idiomatic implementation conditions rather than isolating a pure language effect. Peak memory and cache behaviour were proposed in the broader project but were not measured on this Mac and are not inferred in this paper.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
+    add_para(doc, "The structures are functionally comparable but not internally identical. Python's custom singly linked list differs from C++ std::list, which is typically doubly linked. Python list holds object references, whereas std::vector<int> stores primitive integers contiguously. Consequently, the experiment evaluates idiomatic implementation conditions rather than isolating a pure language effect. This concern is tested empirically in Section 4.5, which reruns the C++ linked benchmark with the singly-linked std::forward_list; the resulting ratios do not shrink under the more closely matched comparison, indicating the linkage mismatch is not the source of the observed language gap. Peak memory and cache behaviour were proposed in the broader project but were not measured on this Mac and are not inferred in this paper.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
 
     heading(doc, "6.3 External and conclusion validity", 2)
     add_para(doc, "One Apple M2 laptop, one Python version and one C++ toolchain cannot represent other processors, operating systems, compilers or runtime configurations. Only four sizes and one random-input family were examined. Ten repetitions support descriptive stability but not broad population inference. Java was not executed because no working JDK was available. The conclusions are therefore restricted to this environment and protocol.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
@@ -422,7 +439,7 @@ def build():
     add_para(doc, "Before journal submission, the benchmark should use calibrated operation batching, add Java 17, collect peak resident memory and hardware cache counters on a controlled Linux machine, record temperature and power mode, test additional input distributions, and reproduce the experiment on at least one independent system. Those extensions should be reported as new evidence, not combined silently with the present Mac data.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
 
     heading(doc, "Data and Code Availability", 1)
-    add_para(doc, f"The repository contains the dataset generator, Python and C++ implementations, Java source, validation tests, execution configuration, raw CSV records and analysis scripts. The raw combined CSV contains {METRICS['record_count']} records and has SHA-256 digest {METRICS['raw_sha256']}. A public repository URL and archived release identifier must be inserted before submission.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
+    add_para(doc, f"The repository contains the dataset generator, Python and C++ implementations, Java source, validation tests, execution configuration, raw CSV records and analysis scripts. The raw combined CSV contains {METRICS['record_count']} records and has SHA-256 digest {METRICS['raw_sha256']}. The supplementary singly-linked construct-validity check (Section 4.5) adds {METRICS['linked_fwd_supplement']['record_count']} further C++ records with SHA-256 digest {METRICS['linked_fwd_supplement']['raw_sha256']}. The repository is publicly available at https://github.com/maheshchudaman/beyond-big-o-research and is archived on Zenodo with concept DOI 10.5281/zenodo.22089928 (version-specific DOI for this release: 10.5281/zenodo.22089929).", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
 
     heading(doc, "Ethics, Authorship and AI-Assistance Statement", 1)
     add_para(doc, "No human-participant, personal or sensitive data were used. Codex assisted with repository scaffolding, code review, execution orchestration, analysis scripting and preparation of this draft. All numerical claims in the manuscript were generated programmatically from the preserved raw CSV; missing measurements were not fabricated. Before submission, the named authors must independently verify the code, results, citations and wording, approve authorship contributions, and adapt this disclosure to the selected journal's policy.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
@@ -456,6 +473,8 @@ def build():
         ["Environment metadata", "results/raw/environment.json"],
         ["Paper analysis", "paper/analyse_for_paper.py"],
         ["Correctness tests", "tests/test_benchmark.py; tests/test_dataset_manifest.py"],
+        ["Construct-validity supplement (raw)", "results/raw/cpp_linked_fwd_combined.csv"],
+        ["Construct-validity supplement (source)", "src/cpp/benchmark.cpp (run_linked_fwd)"],
     ]
     add_table(doc, "Table A1. Repository evidence map.", ["Evidence", "Repository path"], appendix_rows, [3000, 6360], 9.4)
     doc.core_properties.title = "Beyond Big-O: Apple-Silicon Runtime Pilot Study"

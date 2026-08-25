@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <chrono>
+#include <forward_list>
 #include <fstream>
 #include <iostream>
 #include <list>
@@ -74,6 +75,28 @@ Result run_linked(const Dataset& data) {
     return {insert, search, remove, traverse, hits, checksum};
 }
 
+// Construct-validity supplement: std::forward_list is singly-linked, matching the
+// custom Python SinglyLinkedList, unlike std::list (typically doubly-linked) used
+// in run_linked above.
+Result run_linked_fwd(const Dataset& data) {
+    std::forward_list<int> container;
+    i64 hits = 0, checksum = 0;
+    auto insert = elapsed([&] { container.assign(data.values.begin(), data.values.end()); });
+    auto search = elapsed([&] {
+        for (int q : data.queries) hits += std::find(container.begin(), container.end(), q) != container.end();
+    });
+    auto remove = elapsed([&] {
+        for (int key : data.deletes) {
+            auto before = container.before_begin();
+            auto it = container.begin();
+            while (it != container.end() && *it != key) { ++before; ++it; }
+            if (it != container.end()) container.erase_after(before);
+        }
+    });
+    auto traverse = elapsed([&] { checksum = std::accumulate(container.begin(), container.end(), 0LL); });
+    return {insert, search, remove, traverse, hits, checksum};
+}
+
 Result run_hash(const Dataset& data) {
     std::unordered_map<int, int> container;
     i64 hits = 0, checksum = 0;
@@ -90,6 +113,7 @@ Result run_hash(const Dataset& data) {
 Result run_once(const std::string& structure, const Dataset& data) {
     if (structure == "array") return run_array(data);
     if (structure == "linked") return run_linked(data);
+    if (structure == "linked_fwd") return run_linked_fwd(data);
     if (structure == "hash") return run_hash(data);
     throw std::runtime_error("Unknown structure: " + structure);
 }

@@ -374,5 +374,45 @@
   "language_ratio_range_n25000": [
     1.8597691757736696,
     91.68423799582463
-  ]
+  ],
+  "linked_fwd_supplement": {
+    "record_count": 40,
+    "raw_sha256": "ccffc4c004456ee9474ce36489e7bb7c6dacb9bb2b3dfb96ba6e0108c1965bf8",
+    "n25000": {
+      "insert": {
+        "cpp_list_median_ms": 0.2152085,
+        "cpp_forward_list_median_ms": 0.280125,
+        "python_median_ms": 3.3759585,
+        "python_to_forward_list_ratio": 12.051614457831326,
+        "python_to_list_ratio": 15.686919893963296
+      },
+      "search": {
+        "cpp_list_median_ms": 5.712146,
+        "cpp_forward_list_median_ms": 4.6696245,
+        "python_median_ms": 123.3302915,
+        "python_to_forward_list_ratio": 26.411179635536005,
+        "python_to_list_ratio": 21.590885719657727
+      },
+      "delete": {
+        "cpp_list_median_ms": 3.742375,
+        "cpp_forward_list_median_ms": 3.232146,
+        "python_median_ms": 76.787937,
+        "python_to_forward_list_ratio": 23.75757066667162,
+        "python_to_list_ratio": 20.518504158455528
+      },
+      "traverse": {
+        "cpp_list_median_ms": 0.029729,
+        "cpp_forward_list_median_ms": 0.023104,
+        "python_median_ms": 0.7405625,
+        "python_to_forward_list_ratio": 32.05343230609418,
+        "python_to_list_ratio": 24.910440983551414
+      }
+    },
+    "scaling_exponents_5000_25000": {
+      "insert": 0.7090872921698096,
+      "search": 1.7794100629257175,
+      "delete": 1.6366433533758997,
+      "traverse": 0.7475058679451378
+    }
+  }
 }

@@ -17,6 +17,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[1]
 RAW = ROOT / "results/raw/combined.csv"
+LINKED_FWD_RAW = ROOT / "results/raw/cpp_linked_fwd_combined.csv"
 OUT = ROOT / "paper/generated"
 OPERATIONS = ("insert", "search", "delete", "traverse")
 STRUCTURES = ("array", "linked", "hash")
@@ -64,7 +65,60 @@ def scaling_exponent(y1: float, y2: float, n1=5000, n2=25000) -> float:
     return math.log(y2 / y1) / math.log(n2 / n1)
 
 
-def write_metrics(rows, groups):
+def read_linked_fwd_groups():
+    rows = list(csv.DictReader(LINKED_FWD_RAW.open(newline="", encoding="utf-8")))
+    groups: dict[tuple[int, str], list[int]] = defaultdict(list)
+    for row in rows:
+        for operation in OPERATIONS:
+            groups[(int(row["n"]), operation)].append(int(row[f"{operation}_ns"]))
+    return rows, groups
+
+
+def write_linked_fwd_supplement(main_rows, main_groups, fwd_rows, fwd_groups):
+    """Construct-validity check: std::forward_list is singly-linked, matching the
+    custom Python SinglyLinkedList, unlike std::list (typically doubly linked) used
+    in the primary linked condition. Re-running the C++ linked benchmark with a
+    matched container tests whether that representational mismatch inflates the
+    reported Python/C++ ratios (see Section 6.2)."""
+    reference = {
+        int(row["n"]): (row["hits"], row["checksum"])
+        for row in main_rows
+        if row["language"] == "python" and row["structure"] == "linked"
+    }
+    for row in fwd_rows:
+        expected = reference[int(row["n"])]
+        assert (row["hits"], row["checksum"]) == expected, (
+            f"forward_list correctness mismatch at n={row['n']}: "
+            f"got {(row['hits'], row['checksum'])}, expected {expected}"
+        )
+    supplement = {
+        "record_count": len(fwd_rows),
+        "raw_sha256": hashlib.sha256(LINKED_FWD_RAW.read_bytes()).hexdigest(),
+        "n25000": {},
+        "scaling_exponents_5000_25000": {},
+    }
+    for operation in OPERATIONS:
+        cpp_list_values = main_groups[("cpp", "linked", 25000, operation)]
+        fwd_values = fwd_groups[(25000, operation)]
+        python_values = main_groups[("python", "linked", 25000, operation)]
+        cpp_list_median = statistics.median(cpp_list_values)
+        fwd_median = statistics.median(fwd_values)
+        python_median = statistics.median(python_values)
+        # Correctness cross-check: forward_list must agree with std::list and Python
+        # on hits/checksum at every size (verified once here; asserted per-size below).
+        supplement["n25000"][operation] = {
+            "cpp_list_median_ms": cpp_list_median / 1_000_000,
+            "cpp_forward_list_median_ms": fwd_median / 1_000_000,
+            "python_median_ms": python_median / 1_000_000,
+            "python_to_forward_list_ratio": python_median / fwd_median,
+            "python_to_list_ratio": python_median / cpp_list_median,
+        }
+        y1 = statistics.median(fwd_groups[(5000, operation)])
+        supplement["scaling_exponents_5000_25000"][operation] = scaling_exponent(y1, fwd_median)
+    return supplement
+
+
+def write_metrics(rows, groups, fwd_rows, fwd_groups):
     metrics = {
         "record_count": len(rows),
         "raw_sha256": hashlib.sha256(RAW.read_bytes()).hexdigest(),
@@ -116,6 +170,7 @@ def write_metrics(rows, groups):
     metrics["median_group_cv"] = statistics.median(all_cvs)
     metrics["max_group_cv"] = max(all_cvs)
     metrics["language_ratio_range_n25000"] = [min(x[2] for x in ratios), max(x[2] for x in ratios)]
+    metrics["linked_fwd_supplement"] = write_linked_fwd_supplement(rows, groups, fwd_rows, fwd_groups)
     (OUT / "paper_metrics.json").write_text(json.dumps(metrics, indent=2) + "\n", encoding="utf-8")
     with (OUT / "n25000_medians.csv").open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=table_rows[0].keys())
@@ -199,7 +254,8 @@ def draw_language_ratios(ratios):
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     rows, groups = read_groups()
-    metrics, ratios = write_metrics(rows, groups)
+    fwd_rows, fwd_groups = read_linked_fwd_groups()
+    metrics, ratios = write_metrics(rows, groups, fwd_rows, fwd_groups)
     draw_search_scaling(groups)
     draw_language_ratios(ratios)
     print(json.dumps({
