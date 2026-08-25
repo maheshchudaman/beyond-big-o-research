@@ -361,7 +361,7 @@ def build():
     para(doc, "Declarations", style="Heading 5")
     p = para(doc, style="Body Text")
     p.add_run("Conflict of Interest: ").bold = True
-    p.add_run("[Confirm and state, e.g., “The authors declare no conflict of interest.”]")
+    p.add_run("The authors declare no conflict of interest.")
     p = para(doc, style="Body Text")
     p.add_run("Funding: ").bold = True
     p.add_run("This research received no external funding.")
