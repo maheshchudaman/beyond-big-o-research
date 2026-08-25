@@ -178,10 +178,9 @@ def build():
     para(doc, "Beyond Big-O: A Reproducible Apple-Silicon Pilot Study of Runtime Performance for Common Data Structures in Python and C++", style="01_Paper Title")
 
     new_section(doc, cols=1, header=Twips(720), footer=Twips(720))
-    para(doc, "Mahesh Patil¹*, [Second Author Name]²", style="Author")
-    para(doc, "[Department / Faculty Name], [University or Organization Name], [City], [Country]¹", style="Affiliation")
-    para(doc, "[Department / Faculty Name], [University or Organization Name], [City], [Country]²", style="Affiliation")
-    para(doc, "* Corresponding author ([corresponding.author@yourinstitution.edu])", style="sponsors")
+    para(doc, "Mahesh Patil¹*, Varun Patil¹", style="Author")
+    para(doc, "Shah & Anchor Kutchhi Engineering College, Mumbai, Maharashtra, India¹", style="Affiliation")
+    para(doc, "* Corresponding author (mahesh.patil@sakec.ac.in)", style="sponsors")
 
     # ---- Main two-column body ----
     new_section(doc, cols=2)
@@ -356,7 +355,7 @@ def build():
 
     # Component heads (unnumbered)
     para(doc, "Acknowledgment", style="Heading 5")
-    para(doc, "[Add any acknowledgments of individuals, institutions, or resources here, or state “Not applicable” if none.]", style="Body Text")
+    para(doc, "Not applicable.", style="Body Text")
 
     para(doc, "Declarations", style="Heading 5")
     p = para(doc, style="Body Text")
