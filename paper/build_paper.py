@@ -283,6 +283,31 @@ def fmt_ms(value):
     return f"{value:.3f} ms"
 
 
+# Ordered by first in-text appearance so reference numbers stay sequential;
+# add new sources here at the point they are first cited, not at the end.
+REFERENCES = [
+    ("cormen", "Cormen, T. H., Leiserson, C. E., Rivest, R. L., and Stein, C. (2022). Introduction to Algorithms (4th ed.). MIT Press."),
+    ("hennessy", "Hennessy, J. L., and Patterson, D. A. (2019). Computer Architecture: A Quantitative Approach (6th ed.). Morgan Kaufmann."),
+    ("sanders", "Sanders, P. (2009). Algorithm Engineering - An Attempt at a Definition. In Efficient Algorithms, LNCS 5760, 321-340. https://doi.org/10.1007/978-3-642-03456-5_22"),
+    ("mytkowicz", "Mytkowicz, T., Diwan, A., Hauswirth, M., and Sweeney, P. F. (2009). Producing wrong data without doing anything obviously wrong! Proceedings of ASPLOS XIV, 265-276. https://doi.org/10.1145/1508244.1508275"),
+    ("georges", "Georges, A., Buytaert, D., and Eeckhout, L. (2007). Statistically rigorous Java performance evaluation. Proceedings of OOPSLA 2007, 57-76. https://doi.org/10.1145/1297027.1297033"),
+    ("kalibera", "Kalibera, T., and Jones, R. (2013). Rigorous benchmarking in reasonable time. Proceedings of ISMM 2013, 63-74. https://doi.org/10.1145/2464157.2464160"),
+    ("arcuri", "Arcuri, A., and Briand, L. (2011). A practical guide for using statistical tests to assess randomized algorithms in software engineering. Proceedings of ICSE 2011, 1-10. https://doi.org/10.1145/1985793.1985795"),
+    ("fleming", "Fleming, P. J., and Wallace, J. J. (1986). How not to lie with statistics: the correct way to summarize benchmark results. Communications of the ACM, 29(3), 218-221. https://doi.org/10.1145/5666.5673"),
+    ("sandve", "Sandve, G. K., Nekrutenko, A., Taylor, J., and Hovig, E. (2013). Ten simple rules for reproducible computational research. PLOS Computational Biology, 9(10), e1003285. https://doi.org/10.1371/journal.pcbi.1003285"),
+    ("peng", "Peng, R. D. (2011). Reproducible research in computational science. Science, 334(6060), 1226-1227. https://doi.org/10.1126/science.1213847"),
+    ("pythondocs", "Python Software Foundation. (2026). Python 3.13 documentation: Data structures. https://docs.python.org/3.13/tutorial/datastructures.html"),
+    ("isocpp", "ISO/IEC. (2020). ISO/IEC 14882:2020 Programming Languages - C++. International Organization for Standardization."),
+    ("bootstrap", "Efron, B., and Tibshirani, R. J. (1993). An Introduction to the Bootstrap. Chapman and Hall/CRC."),
+    ("cliff", "Cliff, N. (1993). Dominance statistics: Ordinal analyses to answer ordinal questions. Psychological Bulletin, 114(3), 494-509. https://doi.org/10.1037/0033-2909.114.3.494"),
+    ("varghadelaney", "Vargha, A., and Delaney, H. D. (2000). A critique and improvement of the CL common language effect size statistics of McGraw and Wong. Journal of Educational and Behavioral Statistics, 25(2), 101-132. https://doi.org/10.3102/10769986025002101"),
+    ("chilimbi", "Chilimbi, T. M., Hill, M. D., and Larus, J. R. (1999). Cache-conscious structure layout. Proceedings of PLDI 1999, 1-12. https://doi.org/10.1145/301618.301633"),
+    ("drepper", "Drepper, U. (2007). What Every Programmer Should Know About Memory. Red Hat, Inc."),
+    ("astrachan", "Astrachan, O. (2003). Bubble sort: an archaeological algorithmic analysis. ACM SIGCSE Bulletin, 35(1), 1-5. https://doi.org/10.1145/611892.611918"),
+]
+REF = {key: index + 1 for index, (key, _) in enumerate(REFERENCES)}
+
+
 def build():
     doc = Document()
     configure(doc)
@@ -317,8 +342,8 @@ def build():
     add_rich_para(doc, [("Keywords: ", {"bold": True}), ("data structures; Big-O; empirical algorithmics; Python; C++; microbenchmarking; reproducibility; construct validity", {})], align=WD_ALIGN_PARAGRAPH.LEFT)
 
     heading(doc, "1. Introduction", 1)
-    add_para(doc, "Big-O notation provides a machine-independent description of growth as input size increases. It is indispensable for algorithm design, yet it intentionally suppresses constant factors, representation costs and hardware effects [1]. Consequently, two implementations with the same asymptotic class can differ substantially in observed runtime, while a theoretically favourable structure may carry a higher construction or traversal cost for a particular workload.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
-    add_para(doc, "This distinction is especially important in undergraduate computing education. Students often learn that hash-table lookup is expected O(1), array search is O(n), and linked-list traversal is O(n), but they may not observe how language runtimes, boxed objects, allocation strategies and contiguous memory influence actual measurements. Computer architecture texts likewise emphasise that locality and the memory hierarchy shape performance beyond instruction counts [2].", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
+    add_para(doc, f"Big-O notation provides a machine-independent description of growth as input size increases. It is indispensable for algorithm design, yet it intentionally suppresses constant factors, representation costs and hardware effects [{REF['cormen']}]. Consequently, two implementations with the same asymptotic class can differ substantially in observed runtime, while a theoretically favourable structure may carry a higher construction or traversal cost for a particular workload.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
+    add_para(doc, f"This distinction is especially important in undergraduate computing education. Students often learn that hash-table lookup is expected O(1), array search is O(n), and linked-list traversal is O(n), but they may not observe how language runtimes, boxed objects, allocation strategies and contiguous memory influence actual measurements. Computer architecture texts likewise emphasise that locality and the memory hierarchy shape performance beyond instruction counts [{REF['hennessy']}].", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
     add_para(doc, "The objective of this pilot is not to declare one programming language universally superior. It is to test whether a small, reproducible experiment can connect theoretical complexity with measured behaviour while making its assumptions and limitations explicit. The resulting protocol is intended as a foundation for a student research project and a later multi-platform study.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
 
     heading(doc, "1.1 Research questions", 2)
@@ -334,8 +359,8 @@ def build():
     bullet(doc, "An empirical test of whether the C++/Python linked-container mismatch inflates the observed language gap, rather than leaving that concern as an unverified caveat.")
 
     heading(doc, "2. Background and Related Work", 1)
-    add_para(doc, "The analysis of algorithms separates growth rate from implementation detail [1]. Experimental algorithmics complements that abstraction by examining implementations on specified workloads and machines. Algorithm engineering has been described as a methodology connecting design, implementation, experimentation and refinement [3]. This perspective motivates reporting sufficient detail to reproduce not only the code but also the experimental conditions.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
-    add_para(doc, "Performance measurement is vulnerable to effects that are easy to overlook. Mytkowicz et al. showed that apparently harmless environmental changes can alter conclusions [4]. Georges et al. and Kalibera and Jones argued for warm-ups, repeated measurements, uncertainty reporting and explicit treatment of runtime-system variability [5,6]. Fleming and Wallace further cautioned that benchmark summaries can mislead when inappropriate averages are used [7]. The present pilot therefore prioritises medians, dispersion, warm-ups, immutable raw results and correctness checks.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
+    add_para(doc, f"The analysis of algorithms separates growth rate from implementation detail [{REF['cormen']}]. Experimental algorithmics complements that abstraction by examining implementations on specified workloads and machines. Algorithm engineering has been described as a methodology connecting design, implementation, experimentation and refinement [{REF['sanders']}]. This perspective motivates reporting sufficient detail to reproduce not only the code but also the experimental conditions.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
+    add_para(doc, f"Performance measurement is vulnerable to effects that are easy to overlook. Mytkowicz et al. showed that apparently harmless environmental changes can alter conclusions [{REF['mytkowicz']}]. Georges et al. and Kalibera and Jones argued for warm-ups, repeated measurements, uncertainty reporting and explicit treatment of runtime-system variability [{REF['georges']},{REF['kalibera']}]. Arcuri and Briand outlined complementary statistical-testing practice for evaluating randomized algorithms in software engineering, including effect-size reporting alongside significance testing [{REF['arcuri']}]. Fleming and Wallace further cautioned that benchmark summaries can mislead when inappropriate averages are used [{REF['fleming']}]. Reproducibility itself depends on preserving code, data and environment details rather than reporting summary numbers alone [{REF['sandve']},{REF['peng']}]. The present pilot therefore prioritises medians, dispersion, warm-ups, immutable raw results and correctness checks.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
     add_para(doc, "The study is deliberately modest. It does not claim that its three containers exhaust data-structure design or that Python and C++ expose equivalent internal representations. Instead, it investigates idiomatic implementations under a shared external workload. That decision improves classroom relevance but weakens causal attribution: measured differences reflect the combined effect of language, runtime, library implementation and element representation.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
 
     heading(doc, "3. Materials and Methods", 1)
@@ -354,7 +379,7 @@ def build():
     add_table(doc, "Table 1. Recorded execution environment.", ["Item", "Recorded value"], env_rows, [2400, 6960], 9.4)
 
     heading(doc, "3.2 Structures and workload", 2)
-    add_para(doc, "The experiment used three abstract structures. The dynamic-array condition used Python list [9] and C++ std::vector<int> [10]; the linked condition used a custom Python singly linked list and C++ std::list<int>; and the hash condition used Python dict and C++ std::unordered_map<int,int>. Inputs contained unique integers in a deterministic shuffled order.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
+    add_para(doc, f"The experiment used three abstract structures. The dynamic-array condition used Python list [{REF['pythondocs']}] and C++ std::vector<int> [{REF['isocpp']}]; the linked condition used a custom Python singly linked list and C++ std::list<int>; and the hash condition used Python dict and C++ std::unordered_map<int,int>. Inputs contained unique integers in a deterministic shuffled order.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
     method_rows = [
         ["Input size", "1,000; 5,000; 10,000; 25,000"],
         ["Build", "Construct the structure from all n values"],
@@ -374,7 +399,7 @@ def build():
     add_note(doc, "Measurement caveat", "Some optimized C++ workloads completed in less than one microsecond, and the C++ hash-search median at n = 1,000 was recorded as zero. Such values are below a dependable single-shot timing range and are treated as resolution-limited rather than literal zero-cost operations.", risk=True)
 
     heading(doc, "3.5 Analysis", 2)
-    add_para(doc, "The primary summary was the median across ten repetitions, with the mean, standard deviation and non-parametric bootstrap interval retained in the generated analysis file [8]. Coefficient of variation (CV) was used to describe group dispersion. Python-to-C++ median ratios at n = 25,000 were calculated descriptively; Cliff's delta was also computed. Scaling exponents between n = 5,000 and n = 25,000 were estimated as log(T2/T1) / log(n2/n1). No causal language claim is made because language and container representation were not independently manipulated.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
+    add_para(doc, f"The primary summary was the median across ten repetitions, with the mean, standard deviation and non-parametric bootstrap interval retained in the generated analysis file [{REF['bootstrap']}]. Coefficient of variation (CV) was used to describe group dispersion. Python-to-C++ median ratios at n = 25,000 were calculated descriptively; Cliff's delta [{REF['cliff']}], following the A-measure formulation of Vargha and Delaney [{REF['varghadelaney']}], was also computed. Scaling exponents between n = 5,000 and n = 25,000 were estimated as log(T2/T1) / log(n2/n1). No causal language claim is made because language and container representation were not independently manipulated.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
 
     heading(doc, "4. Results", 1)
     heading(doc, "4.1 Correctness and measurement stability", 2)
@@ -419,10 +444,10 @@ def build():
     add_para(doc, "The results do not show a failure of asymptotic analysis. Instead, they demonstrate why the unit of analysis must be stated carefully. A single sequential search is O(n), but this experiment schedules 0.01n searches, creating an O(n^2) batch. A hash lookup is expected O(1) on average, and the corresponding O(n) batch grew close to linearly. The empirical exponents therefore connect measured behaviour to the composed workload rather than replacing theory.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
 
     heading(doc, "5.2 Language and representation effects", 2)
-    add_para(doc, "The Python/C++ differences include many inseparable factors: interpretation versus optimized native code, boxed Python integers versus C++ primitive integers, object allocation, iterator implementation and library design. The largest ratio occurred for contiguous traversal, where optimized native loops can exploit compact primitive storage and compiler transformations. Hash insertion and deletion showed smaller ratios, indicating that language overhead is not a single constant applied uniformly to every structure and operation.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
+    add_para(doc, f"The Python/C++ differences include many inseparable factors: interpretation versus optimized native code, boxed Python integers versus C++ primitive integers, object allocation, iterator implementation and library design. The largest ratio occurred for contiguous traversal, where optimized native loops can exploit compact primitive storage, spatial locality and compiler transformations that pointer-chasing and boxed representations largely defeat [{REF['chilimbi']},{REF['drepper']}]. Hash insertion and deletion showed smaller ratios, indicating that language overhead is not a single constant applied uniformly to every structure and operation.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
 
     heading(doc, "5.3 Educational value", 2)
-    add_para(doc, "A useful teaching sequence is therefore: predict complexity, define the entire workload, implement correctness checks, measure, and then explain both agreement and disagreement. Students should learn to ask not only 'What is the Big-O?' but also 'What exactly is repeated, what representation is used, what is inside the timed region, and is the measurement long enough for the clock?' The repository makes those questions visible and reproducible.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
+    add_para(doc, f"A useful teaching sequence is therefore: predict complexity, define the entire workload, implement correctness checks, measure, and then explain both agreement and disagreement. Students should learn to ask not only 'What is the Big-O?' but also 'What exactly is repeated, what representation is used, what is inside the timed region, and is the measurement long enough for the clock?' This echoes earlier calls in computing education to pair algorithmic analysis with empirical measurement rather than treating asymptotic notation as a substitute for it [{REF['astrachan']}]. The repository makes those questions visible and reproducible.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
 
     heading(doc, "6. Threats to Validity", 1)
     heading(doc, "6.1 Internal validity", 2)
@@ -445,19 +470,7 @@ def build():
     add_para(doc, "No human-participant, personal or sensitive data were used. Codex assisted with repository scaffolding, code review, execution orchestration, analysis scripting and preparation of this draft. All numerical claims in the manuscript were generated programmatically from the preserved raw CSV; missing measurements were not fabricated. Before submission, the named authors must independently verify the code, results, citations and wording, approve authorship contributions, and adapt this disclosure to the selected journal's policy.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
 
     heading(doc, "References", 1)
-    references = [
-        "Cormen, T. H., Leiserson, C. E., Rivest, R. L., and Stein, C. (2022). Introduction to Algorithms (4th ed.). MIT Press.",
-        "Hennessy, J. L., and Patterson, D. A. (2019). Computer Architecture: A Quantitative Approach (6th ed.). Morgan Kaufmann.",
-        "Sanders, P. (2009). Algorithm Engineering - An Attempt at a Definition. In Efficient Algorithms, LNCS 5760, 321-340. https://doi.org/10.1007/978-3-642-03456-5_22",
-        "Mytkowicz, T., Diwan, A., Hauswirth, M., and Sweeney, P. F. (2009). Producing wrong data without doing anything obviously wrong! Proceedings of ASPLOS XIV, 265-276. https://doi.org/10.1145/1508244.1508275",
-        "Georges, A., Buytaert, D., and Eeckhout, L. (2007). Statistically rigorous Java performance evaluation. Proceedings of OOPSLA 2007, 57-76. https://doi.org/10.1145/1297027.1297033",
-        "Kalibera, T., and Jones, R. (2013). Rigorous benchmarking in reasonable time. Proceedings of ISMM 2013, 63-74. https://doi.org/10.1145/2464157.2464160",
-        "Fleming, P. J., and Wallace, J. J. (1986). How not to lie with statistics: the correct way to summarize benchmark results. Communications of the ACM, 29(3), 218-221. https://doi.org/10.1145/5666.5673",
-        "Efron, B., and Tibshirani, R. J. (1993). An Introduction to the Bootstrap. Chapman and Hall/CRC.",
-        "Python Software Foundation. (2026). Python 3.13 documentation: Data structures. https://docs.python.org/3.13/tutorial/datastructures.html",
-        "ISO/IEC. (2020). ISO/IEC 14882:2020 Programming Languages - C++. International Organization for Standardization.",
-    ]
-    for reference in references:
+    for _, reference in REFERENCES:
         p = doc.add_paragraph(style="List Number")
         p.paragraph_format.left_indent = Inches(0.35)
         p.paragraph_format.first_line_indent = Inches(-0.25)
