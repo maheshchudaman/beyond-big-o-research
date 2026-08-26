@@ -622,8 +622,8 @@ def build():
         "analysis scripting and manuscript drafting, including the independent Windows reproduction supplement "
         "(Section IV-I), which was executed by the second author on his own machine, not by the AI assistant. All "
         "numerical claims were generated programmatically from the preserved raw CSV; no measurements were "
-        "fabricated. Before submission, the named authors must independently verify the code, results, citations "
-        "and wording, and take full responsibility for the content."
+        "fabricated. The named authors have independently verified the code, results, citations and wording, and "
+        "take full responsibility for the content."
     )
 
     para(doc, "References", style="Heading 5")
