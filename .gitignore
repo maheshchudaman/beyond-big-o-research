@@ -7,4 +7,5 @@ build/
 workbook/rendered/
 workbook/*.pdf
 .DS_Store
+~$*.docx
 
