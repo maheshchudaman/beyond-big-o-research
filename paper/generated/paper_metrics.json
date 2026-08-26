@@ -426,28 +426,32 @@
           "python_median_ms": 0.0312085,
           "java_median_ms": 0.240583,
           "java_to_cpp_ratio": 36.660266666666665,
-          "python_to_java_ratio": 0.12972030442716234
+          "python_to_java_ratio": 0.12972030442716234,
+          "java_cv_pct": 91.52732239474861
         },
         "search": {
           "cpp_median_ms": 1.4252705,
           "python_median_ms": 16.3885835,
           "java_median_ms": 2.1209165,
           "java_to_cpp_ratio": 1.4880799820104325,
-          "python_to_java_ratio": 7.7271233921750335
+          "python_to_java_ratio": 7.7271233921750335,
+          "java_cv_pct": 5.311221630193102
         },
         "delete": {
           "cpp_median_ms": 1.0716255,
           "python_median_ms": 16.400834,
           "java_median_ms": 1.7319165,
           "java_to_cpp_ratio": 1.6161583500952525,
-          "python_to_java_ratio": 9.469760233821896
+          "python_to_java_ratio": 9.469760233821896,
+          "java_cv_pct": 5.254834227547489
         },
         "traverse": {
           "cpp_median_ms": 0.000958,
           "python_median_ms": 0.0878335,
           "java_median_ms": 0.1051665,
           "java_to_cpp_ratio": 109.77713987473904,
-          "python_to_java_ratio": 0.8351851587720425
+          "python_to_java_ratio": 0.8351851587720425,
+          "java_cv_pct": 54.12989125225208
         }
       },
       "linked": {
@@ -456,28 +460,32 @@
           "python_median_ms": 3.3759585,
           "java_median_ms": 0.088958,
           "java_to_cpp_ratio": 0.41335727910375286,
-          "python_to_java_ratio": 37.95002697902381
+          "python_to_java_ratio": 37.95002697902381,
+          "java_cv_pct": 116.23831150831425
         },
         "search": {
           "cpp_median_ms": 5.712146,
           "python_median_ms": 123.3302915,
           "java_median_ms": 9.3815415,
           "java_to_cpp_ratio": 1.6423847534709373,
-          "python_to_java_ratio": 13.146058299694138
+          "python_to_java_ratio": 13.146058299694138,
+          "java_cv_pct": 1.6367941861731503
         },
         "delete": {
           "cpp_median_ms": 3.742375,
           "python_median_ms": 76.787937,
           "java_median_ms": 6.0964795,
           "java_to_cpp_ratio": 1.6290402485052942,
-          "python_to_java_ratio": 12.595455623200243
+          "python_to_java_ratio": 12.595455623200243,
+          "java_cv_pct": 2.6575962648287024
         },
         "traverse": {
           "cpp_median_ms": 0.029729,
           "python_median_ms": 0.7405625,
           "java_median_ms": 0.0490835,
           "java_to_cpp_ratio": 1.6510309798513236,
-          "python_to_java_ratio": 15.08780954903379
+          "python_to_java_ratio": 15.08780954903379,
+          "java_cv_pct": 60.00683819906894
         }
       },
       "hash": {
@@ -486,28 +494,32 @@
           "python_median_ms": 0.6199795,
           "java_median_ms": 0.54375,
           "java_to_cpp_ratio": 1.9563750843265122,
-          "python_to_java_ratio": 1.140192183908046
+          "python_to_java_ratio": 1.140192183908046,
+          "java_cv_pct": 35.018616510545364
         },
         "search": {
           "cpp_median_ms": 0.000708,
           "python_median_ms": 0.0096045,
           "java_median_ms": 0.008562,
           "java_to_cpp_ratio": 12.09322033898305,
-          "python_to_java_ratio": 1.1217589348283112
+          "python_to_java_ratio": 1.1217589348283112,
+          "java_cv_pct": 29.349624999300172
         },
         "delete": {
           "cpp_median_ms": 0.0048955,
           "python_median_ms": 0.0091045,
           "java_median_ms": 0.0148545,
           "java_to_cpp_ratio": 3.0343172301092842,
-          "python_to_java_ratio": 0.6129119122151536
+          "python_to_java_ratio": 0.6129119122151536,
+          "java_cv_pct": 30.675868003282265
         },
         "traverse": {
           "cpp_median_ms": 0.0295,
           "python_median_ms": 0.108667,
           "java_median_ms": 0.4498335,
           "java_to_cpp_ratio": 15.248593220338982,
-          "python_to_java_ratio": 0.241571603715597
+          "python_to_java_ratio": 0.241571603715597,
+          "java_cv_pct": 59.08098568409324
         }
       }
     },
@@ -530,6 +542,30 @@
         "delete": 0.7684577688488453,
         "traverse": 0.7284877719748614
       }
-    }
+    },
+    "median_group_cv_pct": 38.604163058234,
+    "max_group_cv_pct": 147.00131843737586,
+    "stable_ratio_range": [
+      1.4880799820104325,
+      1.6423847534709373
+    ],
+    "slower_than_python_combinations": [
+      [
+        "array",
+        "insert"
+      ],
+      [
+        "array",
+        "traverse"
+      ],
+      [
+        "hash",
+        "delete"
+      ],
+      [
+        "hash",
+        "traverse"
+      ]
+    ]
   }
 }

@@ -315,8 +315,9 @@ def build():
     # Academic title block (memo_masthead-inspired override).
     add_para(doc, "ORIGINAL RESEARCH - PILOT STUDY", size=9.5, bold=True, color=BLUE, before=4, after=7)
     add_para(doc, "Beyond Big-O: A Reproducible Apple-Silicon Pilot Study of Runtime Performance for Common Data Structures in Python and C++", size=22, bold=True, color=DARK_BLUE, after=9, line=1.08)
-    add_para(doc, "Mahesh Patil and Student Research Team", size=12, bold=True, color=MID_BLUE, after=2)
-    add_para(doc, "Affiliation to be added before submission", size=10, italic=True, color=MUTED, after=12)
+    add_para(doc, "Mahesh Patil*, Varun Patil", size=12, bold=True, color=MID_BLUE, after=2)
+    add_para(doc, "Shah & Anchor Kutchhi Engineering College, Mumbai, Maharashtra, India", size=10, italic=True, color=MUTED, after=2)
+    add_para(doc, "* Corresponding author (mahesh.patil@sakec.ac.in)", size=9, italic=True, color=MUTED, after=12)
     add_note(doc, "Draft status", "Prepared from measurements executed in Codex on 23 August 2026, with supplementary construct-validity (Section 4.5) and third-language (Section 4.6) checks added on 25 August 2026. This manuscript is intended for internal academic review and methodological refinement before journal submission.")
 
     heading(doc, "Abstract", 1)
@@ -336,8 +337,12 @@ def build():
         "std::forward_list to match the Python implementation's representation, which reproduced the same pattern of "
         "ratios (Section 4.5) rather than narrowing it. A further supplementary run added Java as a third language "
         "(Section 4.6): Java's ratio to C++ was operation-dependent rather than uniformly intermediate between Python "
-        "and C++, ranging from 0.41x (Java faster than C++ for linked insertion) to 109.78x (array traversal), and Java "
-        "was slower than Python on two of the twelve structure-operation combinations despite being faster overall. The "
+        "and C++, and Java was slower than Python on four of the twelve structure-operation combinations despite being "
+        "faster overall. Measurement dispersion for Java was substantially higher than for the primary design (median "
+        "CV 38.6% versus 4.0%), concentrated in short-duration operations consistent with JIT compilation transitioning "
+        "mid-measurement; among the four combinations with low dispersion (CV under 6%), Java's ratio to C++ was a "
+        "narrower 1.49x-1.64x, and headline extremes outside that range should be read as indicative rather than "
+        "precise. The "
         "findings support teaching Big-O together with implementation-aware measurement, while the single-machine "
         "scope, absence of hardware-counter data, and submicrosecond C++ measurements make the work a pilot rather "
         "than a final general-purpose benchmark."
@@ -457,26 +462,47 @@ def build():
                 f"{entry['java_to_cpp_ratio']:.2f}x",
             ])
     add_table(doc, "Table 5. Median workload runtime at n = 25,000 including Java (ten repetitions).", ["Structure", "Operation", "C++17", "Python 3.13", "Java", "Java/C++"], java_rows, [1500, 1600, 1750, 1750, 1550, 1610], 8.4)
+    stable_lo, stable_hi = java_sup["stable_ratio_range"]
+    add_note(
+        doc,
+        "Measurement caveat",
+        f"Median CV across the Java supplement's 48 (structure, size, operation) groups was "
+        f"{java_sup['median_group_cv_pct']:.1f}%, versus 4.0% for the primary Python/C++ design, and the maximum "
+        f"reached {java_sup['max_group_cv_pct']:.1f}%. Dispersion was concentrated in groups with short absolute "
+        f"durations, including linked insertion at n = 25,000 (CV = {java_sup['n25000']['linked']['insert']['java_cv_pct']:.1f}%: "
+        f"several repetitions cluster near tens of microseconds while others exceed one millisecond), consistent with "
+        f"the JIT compiler transitioning from interpreted to compiled execution partway through the ten recorded "
+        f"repetitions despite three unrecorded warm-ups. Array and linked search and delete at n = 25,000, the "
+        f"longest-duration groups, remained stable (CV under 6%). Ratios computed from high-dispersion groups should "
+        f"be read as indicative rather than precise.",
+        risk=True,
+    )
+    slower = java_sup["slower_than_python_combinations"]
+    slower_desc = ", ".join(f"{s} {op}" for s, op in slower)
     add_para(
         doc,
-        "Java's ratio to C++ was operation-dependent rather than uniformly intermediate between the interpreted and "
-        "compiled extremes: across the twelve structure-operation combinations it ranged from 0.41x (linked insertion, "
-        "where Java's median was faster than C++'s) to 109.78x (array traversal), a wider spread than the Python/C++ "
-        "range for the same twelve combinations. Two results are worth flagging specifically because they run against "
-        "the intuition that a JIT-compiled language should sit strictly between interpreted Python and compiled C++. "
-        "First, Java's array-traversal median (0.105 ms) was slower than Python's (0.088 ms) despite both being far "
-        "above C++'s submicrosecond median, plausibly reflecting boxed-Integer ArrayList iteration overhead that a "
-        "primitive int[] traversal would avoid. Second, Java's hash-traversal median (0.450 ms) was roughly four times "
-        "slower than Python's (0.109 ms), even though Java outperformed Python on hash search and delete by a "
-        "comparable margin in the other direction, consistent with boxed-Long iteration cost in the reference HashMap "
-        "implementation rather than a general JVM weakness. Scaling exponents for Java search and deletion between "
-        f"n = 5,000 and n = 25,000 were {java_sup['scaling_exponents_5000_25000']['array']['search']:.2f} and "
+        f"Java's ratio to C++ was operation-dependent rather than uniformly intermediate between the interpreted and "
+        f"compiled extremes: across the twelve structure-operation combinations it ranged from 0.41x (linked "
+        f"insertion) to 109.78x (array traversal), a wider spread than the Python/C++ range for the same twelve "
+        f"combinations, though both extremes sit in high-dispersion groups (see the measurement caveat above). Among "
+        f"the four combinations with low dispersion (array and linked search and delete, all CV under 6%), the range "
+        f"narrows to a more defensible {stable_lo:.2f}x-{stable_hi:.2f}x. Four of the twelve combinations showed Java "
+        f"slower than Python ({slower_desc}), not the uniform Java-beats-Python pattern the JIT-compiled label might "
+        f"suggest. The largest such gap was array insertion, where Java's median (0.241 ms) was about 7.7 times "
+        f"Python's (0.031 ms) and 36.66 times C++'s; hash traversal was next, at roughly four times Python's median. "
+        f"Both plausibly reflect boxed-object overhead specific to Java's reference-type collections -- "
+        f"ArrayList<Integer> resizing and autoboxing for insertion, boxed-Long iteration for HashMap traversal -- "
+        f"rather than a general JVM weakness, since Java was faster than Python on hash insertion and search for the "
+        f"same structure. Scaling exponents for the stable search and deletion operations between n = 5,000 and n = "
+        f"25,000 were "
+        f"{java_sup['scaling_exponents_5000_25000']['array']['search']:.2f} and "
         f"{java_sup['scaling_exponents_5000_25000']['array']['delete']:.2f} for the array and "
         f"{java_sup['scaling_exponents_5000_25000']['linked']['search']:.2f} and "
-        f"{java_sup['scaling_exponents_5000_25000']['linked']['delete']:.2f} for the linked structure, consistent with "
-        "the same batch-scaling explanation given in Section 5.1. These results reinforce rather than complicate the "
-        "paper's central methodological point: coarse language-level generalisations do not hold uniformly across "
-        "operations, and only workload-level measurement exposes where they break down.",
+        f"{java_sup['scaling_exponents_5000_25000']['linked']['delete']:.2f} for the linked structure, consistent "
+        f"with the same batch-scaling explanation given in Section 5.1. These results reinforce rather than "
+        f"complicate the paper's central methodological point: coarse language-level generalisations do not hold "
+        f"uniformly across operations, and the measurement itself, not just the workload, must be scrutinised before "
+        f"a ratio is trusted.",
         align=WD_ALIGN_PARAGRAPH.JUSTIFY,
     )
 
@@ -493,6 +519,7 @@ def build():
     heading(doc, "6. Threats to Validity", 1)
     heading(doc, "6.1 Internal validity", 2)
     add_para(doc, "Background activity, thermal conditions and operating-system scheduling were not instrumented. Although jobs were shuffled and measurements were repeated, the study did not pin processes to performance cores. Extremely short C++ operations are vulnerable to timer quantisation and clock-call overhead. A revised benchmark should batch pure operations until each timed interval exceeds a predefined duration and should separately quantify timing overhead.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
+    add_para(doc, f"The three-warm-up protocol, calibrated for the primary C++/Python design, proved insufficient for several fast Java operations (Section 4.6): median CV across the Java supplement's 48 groups was {METRICS['java_supplement']['median_group_cv_pct']:.1f}% versus 4.0% for the primary design, consistent with JIT compilation transitioning from interpreted to compiled execution mid-measurement. A revised Java benchmark should detect steady state explicitly, for example by warming up until consecutive batches agree within a tolerance, rather than relying on a fixed repetition count.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
 
     heading(doc, "6.2 Construct validity", 2)
     add_para(doc, "The structures are functionally comparable but not internally identical. Python's custom singly linked list differs from C++ std::list, which is typically doubly linked. Python list holds object references, whereas std::vector<int> stores primitive integers contiguously. Consequently, the experiment evaluates idiomatic implementation conditions rather than isolating a pure language effect. This concern is tested empirically in Section 4.5, which reruns the C++ linked benchmark with the singly-linked std::forward_list; the resulting ratios do not shrink under the more closely matched comparison, indicating the linkage mismatch is not the source of the observed language gap. Peak memory and cache behaviour were proposed in the broader project but were not measured on this Mac and are not inferred in this paper.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
@@ -501,14 +528,14 @@ def build():
     add_para(doc, "One Apple M2 laptop, one Python version and one C++ toolchain cannot represent other processors, operating systems, compilers or runtime configurations. Only four sizes and one random-input family were examined. Ten repetitions support descriptive stability but not broad population inference. Java was not executed in the primary 23 August 2026 session because no working JDK was available; Section 4.6 reports a supplementary Java run added on 25 August 2026 using a subsequently installed JDK on the same machine, so that check still shares this section's single-machine limitation. The conclusions are therefore restricted to this environment and protocol.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
 
     heading(doc, "7. Conclusion and Future Work", 1)
-    add_para(doc, "This reproducible Mac pilot showed that theoretical growth and observed runtime can be taught together. Sequential search and deletion batches grew close to quadratically when both collection size and operation count increased, while hash batches grew close to linearly. Python and C++ showed substantial but operation-dependent runtime differences, and all correctness outputs agreed. A supplementary Java run showed that a JIT-compiled, managed-runtime language does not sit uniformly between the interpreted and compiled extremes: it was faster than C++ for linked insertion and slower than Python for two of the twelve structure-operation combinations. The study also exposed a measurement weakness: several optimized C++ workloads were too short for reliable single-shot timing.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
+    add_para(doc, "This reproducible Mac pilot showed that theoretical growth and observed runtime can be taught together. Sequential search and deletion batches grew close to quadratically when both collection size and operation count increased, while hash batches grew close to linearly. Python and C++ showed substantial but operation-dependent runtime differences, and all correctness outputs agreed. A supplementary Java run showed that a JIT-compiled, managed-runtime language does not sit uniformly between the interpreted and compiled extremes, slower than Python on four of the twelve structure-operation combinations despite being faster overall; the run also exposed measurement dispersion far higher than the primary design's, a methodological finding in its own right. The study also exposed a measurement weakness: several optimized C++ workloads were too short for reliable single-shot timing.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
     add_para(doc, "Before journal submission, the benchmark should use calibrated operation batching, collect peak resident memory and hardware cache counters on a controlled Linux machine, record temperature and power mode, test additional input distributions, and reproduce the experiment on at least one independent system. The Java results in Section 4.6 address the language-coverage gap but not the single-machine, single-session limitation; a full three-language run alongside a second machine remains future work. Those extensions should be reported as new evidence, not combined silently with the present Mac data.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
 
     heading(doc, "Data and Code Availability", 1)
     add_para(doc, f"The repository contains the dataset generator, Python, C++ and Java implementations, validation tests, execution configuration, raw CSV records and analysis scripts. The raw combined CSV contains {METRICS['record_count']} records and has SHA-256 digest {METRICS['raw_sha256']}. The supplementary singly-linked construct-validity check (Section 4.5) adds {METRICS['linked_fwd_supplement']['record_count']} further C++ records with SHA-256 digest {METRICS['linked_fwd_supplement']['raw_sha256']}, and the supplementary Java run (Section 4.6) adds {METRICS['java_supplement']['record_count']} further records with SHA-256 digest {METRICS['java_supplement']['raw_sha256']}. The repository is publicly available at https://github.com/maheshchudaman/beyond-big-o-research and is archived on Zenodo with concept DOI 10.5281/zenodo.22089928, which always resolves to the latest archived release.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
 
     heading(doc, "Ethics, Authorship and AI-Assistance Statement", 1)
-    add_para(doc, "No human-participant, personal or sensitive data were used. Codex assisted with repository scaffolding, code review, execution orchestration, analysis scripting and preparation of this draft. All numerical claims in the manuscript were generated programmatically from the preserved raw CSV; missing measurements were not fabricated. Before submission, the named authors must independently verify the code, results, citations and wording, approve authorship contributions, and adapt this disclosure to the selected journal's policy.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
+    add_para(doc, "No human-participant, personal or sensitive data were used. Generative AI (Codex and Claude) assisted with repository scaffolding, code review, execution orchestration, analysis scripting and preparation of this draft, including the supplementary construct-validity and third-language checks added on 25 August 2026. All numerical claims in the manuscript were generated programmatically from the preserved raw CSV; missing measurements were not fabricated. Before submission, the named authors must independently verify the code, results, citations and wording, approve authorship contributions, and adapt this disclosure to the selected journal's policy.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
 
     heading(doc, "References", 1)
     for _, reference in REFERENCES:
@@ -535,7 +562,7 @@ def build():
     add_table(doc, "Table A1. Repository evidence map.", ["Evidence", "Repository path"], appendix_rows, [3000, 6360], 9.4)
     doc.core_properties.title = "Beyond Big-O: Apple-Silicon Runtime Pilot Study"
     doc.core_properties.subject = "Reproducible empirical comparison of data-structure runtime in Python and C++"
-    doc.core_properties.author = "Mahesh Patil and Student Research Team"
+    doc.core_properties.author = "Mahesh Patil and Varun Patil"
     doc.core_properties.keywords = "Big-O, data structures, runtime, Python, C++, Apple M2, reproducibility"
     doc.core_properties.comments = "Draft generated from executed Mac measurements; requires author and journal-specific review."
     doc.save(OUTPUT)

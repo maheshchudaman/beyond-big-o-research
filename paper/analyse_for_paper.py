@@ -158,16 +158,46 @@ def write_java_supplement(main_rows, main_groups, java_rows, java_groups):
         for operation in OPERATIONS:
             cpp_median = statistics.median(main_groups[("cpp", structure, 25000, operation)])
             python_median = statistics.median(main_groups[("python", structure, 25000, operation)])
-            java_median = statistics.median(java_groups[(structure, 25000, operation)])
+            java_values = java_groups[(structure, 25000, operation)]
+            java_median = statistics.median(java_values)
+            java_mean = statistics.mean(java_values)
+            java_cv = (statistics.pstdev(java_values) / java_mean * 100) if java_mean else 0.0
             supplement["n25000"][structure][operation] = {
                 "cpp_median_ms": cpp_median / 1_000_000,
                 "python_median_ms": python_median / 1_000_000,
                 "java_median_ms": java_median / 1_000_000,
                 "java_to_cpp_ratio": java_median / cpp_median,
                 "python_to_java_ratio": python_median / java_median,
+                "java_cv_pct": java_cv,
             }
             y1 = statistics.median(java_groups[(structure, 5000, operation)])
             supplement["scaling_exponents_5000_25000"][structure][operation] = scaling_exponent(y1, java_median)
+
+    # Dispersion across every (structure, n, operation) group, not just n=25000,
+    # mirroring the primary study's median/max CV reporting in Section 4.1.
+    all_cvs = []
+    for key, values in java_groups.items():
+        mean = statistics.mean(values)
+        all_cvs.append((statistics.pstdev(values) / mean * 100) if mean else 0.0)
+    supplement["median_group_cv_pct"] = statistics.median(all_cvs)
+    supplement["max_group_cv_pct"] = max(all_cvs)
+
+    # Combinations at n=25,000 with low dispersion (CV < 10%) give the more
+    # defensible ratio range; the full 0.41x-109.78x spread mixes in noisy,
+    # short-duration groups (see the measurement caveat in Section 4.6).
+    stable_ratios = [
+        entry["java_to_cpp_ratio"]
+        for structure in STRUCTURES
+        for entry in [supplement["n25000"][structure][op] for op in OPERATIONS]
+        if entry["java_cv_pct"] < 10.0
+    ]
+    supplement["stable_ratio_range"] = [min(stable_ratios), max(stable_ratios)]
+    supplement["slower_than_python_combinations"] = [
+        (structure, operation)
+        for structure in STRUCTURES
+        for operation in OPERATIONS
+        if supplement["n25000"][structure][operation]["python_to_java_ratio"] < 1.0
+    ]
     return supplement
 
 
