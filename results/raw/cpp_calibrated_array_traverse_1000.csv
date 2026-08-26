@@ -1,0 +1,11 @@
+language,structure,dataset,n,operation,repeat,batch_size,elapsed_ns,per_op_ns,hits,checksum
+cpp,array,dataset_1000.txt,1000,traverse,0,32768,1944708,59,0,494272
+cpp,array,dataset_1000.txt,1000,traverse,1,32768,1814209,55,0,494272
+cpp,array,dataset_1000.txt,1000,traverse,2,32768,1675208,51,0,494272
+cpp,array,dataset_1000.txt,1000,traverse,3,32768,1580834,48,0,494272
+cpp,array,dataset_1000.txt,1000,traverse,4,32768,1611083,49,0,494272
+cpp,array,dataset_1000.txt,1000,traverse,5,32768,1519791,46,0,494272
+cpp,array,dataset_1000.txt,1000,traverse,6,32768,1455875,44,0,494272
+cpp,array,dataset_1000.txt,1000,traverse,7,32768,1398667,42,0,494272
+cpp,array,dataset_1000.txt,1000,traverse,8,32768,1390250,42,0,494272
+cpp,array,dataset_1000.txt,1000,traverse,9,32768,1350709,41,0,494272

@@ -1,0 +1,11 @@
+language,structure,dataset,n,operation,repeat,batch_size,elapsed_ns,per_op_ns,hits,checksum
+cpp,array,dataset_25000.txt,25000,traverse,0,2048,1955666,954,0,309399781
+cpp,array,dataset_25000.txt,25000,traverse,1,2048,1905708,930,0,309399781
+cpp,array,dataset_25000.txt,25000,traverse,2,2048,1919167,937,0,309399781
+cpp,array,dataset_25000.txt,25000,traverse,3,2048,1961167,957,0,309399781
+cpp,array,dataset_25000.txt,25000,traverse,4,2048,1930667,942,0,309399781
+cpp,array,dataset_25000.txt,25000,traverse,5,2048,1846708,901,0,309399781
+cpp,array,dataset_25000.txt,25000,traverse,6,2048,1923125,939,0,309399781
+cpp,array,dataset_25000.txt,25000,traverse,7,2048,1905417,930,0,309399781
+cpp,array,dataset_25000.txt,25000,traverse,8,2048,1919708,937,0,309399781
+cpp,array,dataset_25000.txt,25000,traverse,9,2048,1898917,927,0,309399781

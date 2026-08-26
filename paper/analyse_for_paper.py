@@ -19,6 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 RAW = ROOT / "results/raw/combined.csv"
 LINKED_FWD_RAW = ROOT / "results/raw/cpp_linked_fwd_combined.csv"
 JAVA_RAW = ROOT / "results/raw/java_combined.csv"
+CALIBRATED_RAW = ROOT / "results/raw/cpp_calibrated_combined.csv"
 OUT = ROOT / "paper/generated"
 OPERATIONS = ("insert", "search", "delete", "traverse")
 STRUCTURES = ("array", "linked", "hash")
@@ -201,6 +202,63 @@ def write_java_supplement(main_rows, main_groups, java_rows, java_groups):
     return supplement
 
 
+def write_calibration_supplement(main_rows):
+    """Measurement-resolution supplement: array traversal and hash search were
+    the two operations recorded near the clock's own tick granularity in the
+    primary single-shot design (Section 3.4 measurement caveat). Both are
+    read-only and idempotent, so batching the operation until the timed
+    interval clears a calibration threshold gives a far less noisy
+    per-operation estimate than a single untimed shot (see Section 4.7)."""
+    rows = list(csv.DictReader(CALIBRATED_RAW.open(newline="", encoding="utf-8")))
+    reference = {
+        (row["structure"], int(row["n"])): (row["hits"], row["checksum"])
+        for row in main_rows
+        if row["language"] == "cpp"
+    }
+    for row in rows:
+        key = (row["structure"], int(row["n"]))
+        expected = reference[key]
+        got = (row["hits"], row["checksum"])
+        # Only the field relevant to this operation was captured; the other is "0".
+        if row["operation"] == "search":
+            assert got[0] == expected[0], f"calibrated hits mismatch at {key}: got {got[0]}, expected {expected[0]}"
+        else:
+            assert got[1] == expected[1], f"calibrated checksum mismatch at {key}: got {got[1]}, expected {expected[1]}"
+
+    supplement = {
+        "record_count": len(rows),
+        "raw_sha256": hashlib.sha256(CALIBRATED_RAW.read_bytes()).hexdigest(),
+        "threshold_ns": 1_000_000,
+        "by_size": {},
+    }
+    groups: dict[tuple[str, str, int], list[int]] = defaultdict(list)
+    batch_sizes: dict[tuple[str, str, int], set[str]] = defaultdict(set)
+    for row in rows:
+        key = (row["structure"], row["operation"], int(row["n"]))
+        groups[key].append(int(row["per_op_ns"]))
+        batch_sizes[key].add(row["batch_size"])
+
+    all_cvs = []
+    for (structure, operation, n), values in groups.items():
+        mean = statistics.mean(values)
+        cv = (statistics.pstdev(values) / mean * 100) if mean else 0.0
+        all_cvs.append(cv)
+        single_shot_ns = statistics.median(
+            int(r[f"{operation}_ns"])
+            for r in main_rows
+            if r["language"] == "cpp" and r["structure"] == structure and int(r["n"]) == n
+        )
+        supplement["by_size"].setdefault(structure, {}).setdefault(operation, {})[n] = {
+            "single_shot_ns": single_shot_ns,
+            "calibrated_median_ns": statistics.median(values),
+            "calibrated_cv_pct": cv,
+            "batch_sizes": sorted(batch_sizes[key]),
+        }
+    supplement["median_group_cv_pct"] = statistics.median(all_cvs)
+    supplement["max_group_cv_pct"] = max(all_cvs)
+    return supplement
+
+
 def write_metrics(rows, groups, fwd_rows, fwd_groups, java_rows, java_groups):
     metrics = {
         "record_count": len(rows),
@@ -255,6 +313,7 @@ def write_metrics(rows, groups, fwd_rows, fwd_groups, java_rows, java_groups):
     metrics["language_ratio_range_n25000"] = [min(x[2] for x in ratios), max(x[2] for x in ratios)]
     metrics["linked_fwd_supplement"] = write_linked_fwd_supplement(rows, groups, fwd_rows, fwd_groups)
     metrics["java_supplement"] = write_java_supplement(rows, groups, java_rows, java_groups)
+    metrics["calibration_supplement"] = write_calibration_supplement(rows)
     (OUT / "paper_metrics.json").write_text(json.dumps(metrics, indent=2) + "\n", encoding="utf-8")
     with (OUT / "n25000_medians.csv").open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=table_rows[0].keys())

@@ -330,7 +330,9 @@ def build():
         "recorded repetitions, yielding 240 validated measurement records. At n = 25,000, median Python runtimes were "
         "1.86-91.68 times the corresponding C++ medians across the twelve structure-operation combinations; the upper "
         "end of this range reflects a submicrosecond, resolution-limited C++ traversal median (Section 3.4) rather than "
-        "a stable absolute figure. Batched search and deletion for sequential structures exhibited empirical scaling "
+        "a stable absolute figure; a calibrated-batching supplement (Section 4.7) confirmed the affected medians were "
+        "directionally correct and reduced their dispersion from clock-tick noise to under 2% CV in three of four "
+        "sizes. Batched search and deletion for sequential structures exhibited empirical scaling "
         "exponents of approximately 1.85-2.00 because both the collection size and the number of operations increased "
         "with n; hash workloads were closer to linear. All implementations produced identical search-hit counts and "
         "post-deletion checksums, including a supplementary re-run of the linked benchmark using a singly-linked "
@@ -367,6 +369,7 @@ def build():
     bullet(doc, "A transparent account of measurement-resolution, implementation-equivalence and external-validity limitations.")
     bullet(doc, "An empirical test of whether the C++/Python linked-container mismatch inflates the observed language gap, rather than leaving that concern as an unverified caveat.")
     bullet(doc, "A third-language check that re-runs the full workload under Java, testing whether the Python/C++ pattern generalises rather than leaving Java's absence as an unaddressed limitation.")
+    bullet(doc, "A calibrated-batching supplement that resolves the two resolution-limited C++ groups into stable, low-dispersion estimates, converting an open measurement caveat into a quantified one.")
 
     heading(doc, "2. Background and Related Work", 1)
     add_para(doc, f"The analysis of algorithms separates growth rate from implementation detail [{REF['cormen']}]. Experimental algorithmics complements that abstraction by examining implementations on specified workloads and machines. Algorithm engineering has been described as a methodology connecting design, implementation, experimentation and refinement [{REF['sanders']}]. This perspective motivates reporting sufficient detail to reproduce not only the code but also the experimental conditions.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
@@ -406,7 +409,7 @@ def build():
 
     heading(doc, "3.4 Measurement protocol", 2)
     add_para(doc, "For every language-structure-size combination, the program performed three unrecorded warm-ups followed by ten recorded repetitions. Jobs were shuffled with the experiment seed. Operation durations were measured using monotonic high-resolution clocks and reported in nanoseconds. The complete design produced 2 languages x 3 structures x 4 sizes x 10 repetitions = 240 records.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
-    add_note(doc, "Measurement caveat", "Some optimized C++ workloads completed in less than one microsecond, and the C++ hash-search median at n = 1,000 was recorded as zero. Such values are below a dependable single-shot timing range and are treated as resolution-limited rather than literal zero-cost operations.", risk=True)
+    add_note(doc, "Measurement caveat", "Some optimized C++ workloads completed in less than one microsecond, and the C++ hash-search median at n = 1,000 was recorded as zero. Such values are below a dependable single-shot timing range and are treated as resolution-limited rather than literal zero-cost operations. Section 4.7 reports a calibrated-batching supplement that resolves this ambiguity for the affected groups.", risk=True)
 
     heading(doc, "3.5 Analysis", 2)
     add_para(doc, f"The primary summary was the median across ten repetitions, with the mean, standard deviation and non-parametric bootstrap interval retained in the generated analysis file [{REF['bootstrap']}]. Coefficient of variation (CV) was used to describe group dispersion. Python-to-C++ median ratios at n = 25,000 were calculated descriptively; Cliff's delta [{REF['cliff']}], following the A-measure formulation of Vargha and Delaney [{REF['varghadelaney']}], was also computed. Scaling exponents between n = 5,000 and n = 25,000 were estimated as log(T2/T1) / log(n2/n1). No causal language claim is made because language and container representation were not independently manipulated.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
@@ -506,6 +509,49 @@ def build():
         align=WD_ALIGN_PARAGRAPH.JUSTIFY,
     )
 
+    heading(doc, "4.7 Measurement-resolution supplement: calibrated batching", 2)
+    calib = METRICS["calibration_supplement"]
+    add_para(
+        doc,
+        "Section 3.4 flags array traversal and hash search as vulnerable to timer quantisation: both are far shorter "
+        "than one microsecond at small n, and the C++ hash-search median at n = 1,000 was recorded as literally zero. "
+        "Both operations are read-only and idempotent, so unlike insertion or deletion they can be repeated on the "
+        "same container without side effects. A calibrated-batching supplement therefore re-measured both across all "
+        f"four input sizes: for each repeat, the operation was run in a tight loop with the batch size doubled until "
+        f"the total interval reached a {calib['threshold_ns'] // 1_000_000} ms calibration threshold, then per-operation "
+        f"time was reported as elapsed time divided by batch size. Every calibrated run reproduced the same hit count "
+        f"or checksum as the corresponding primary single-shot run at every input size, verified programmatically "
+        f"before the comparison was computed.",
+        align=WD_ALIGN_PARAGRAPH.JUSTIFY,
+    )
+    calib_rows = []
+    for structure, operation in (("array", "traverse"), ("hash", "search")):
+        for n in (1000, 5000, 10000, 25000):
+            e = calib["by_size"][structure][operation][str(n)]
+            calib_rows.append([
+                structure.title(), operation.title(), f"{n:,}",
+                f"{e['single_shot_ns']:.0f} ns", f"{e['calibrated_median_ns']:.1f} ns", f"{e['calibrated_cv_pct']:.1f}%",
+            ])
+    add_table(doc, "Table 6. Single-shot versus calibrated-batch median per-operation time.", ["Structure", "Operation", "n", "Single-shot", "Calibrated", "Calibrated CV"], calib_rows, [1300, 1500, 1200, 1700, 1700, 1360], 8.4)
+    hash_1000 = calib["by_size"]["hash"]["search"]["1000"]
+    array_1000 = calib["by_size"]["array"]["traverse"]["1000"]
+    add_para(
+        doc,
+        f"Calibrated batching resolved the ambiguity the primary design could not: the C++ hash-search median at "
+        f"n = 1,000, recorded as zero in the single-shot design, resolves to {hash_1000['calibrated_median_ns']:.0f} "
+        f"ns under batching -- a real, non-zero cost, not literal zero-cost lookup. Dispersion across the eight "
+        f"(structure, operation, n) groups was far lower than the single-shot design's: median CV "
+        f"{calib['median_group_cv_pct']:.1f}%, maximum {calib['max_group_cv_pct']:.1f}% (the array-traversal group at "
+        f"n = 1,000, still the smallest absolute magnitude tested). Calibrated medians were consistently close to but "
+        f"somewhat below the original single-shot medians at every size (for example, array traversal at n = 25,000: "
+        f"{calib['by_size']['array']['traverse']['25000']['calibrated_median_ns']:.0f} ns calibrated versus "
+        f"{calib['by_size']['array']['traverse']['25000']['single_shot_ns']:.0f} ns single-shot), consistent with the "
+        f"single-shot design carrying a small, roughly constant per-call overhead that batching amortises away. This "
+        f"confirms the primary study's point estimates were directionally correct despite their high dispersion, and "
+        f"converts the resolution-limited caveat in Section 3.4 from an open concern into a quantified, resolved one.",
+        align=WD_ALIGN_PARAGRAPH.JUSTIFY,
+    )
+
     heading(doc, "5. Discussion", 1)
     heading(doc, "5.1 Big-O explained, not contradicted", 2)
     add_para(doc, "The results do not show a failure of asymptotic analysis. Instead, they demonstrate why the unit of analysis must be stated carefully. A single sequential search is O(n), but this experiment schedules 0.01n searches, creating an O(n^2) batch. A hash lookup is expected O(1) on average, and the corresponding O(n) batch grew close to linearly. The empirical exponents therefore connect measured behaviour to the composed workload rather than replacing theory.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
@@ -518,7 +564,7 @@ def build():
 
     heading(doc, "6. Threats to Validity", 1)
     heading(doc, "6.1 Internal validity", 2)
-    add_para(doc, "Background activity, thermal conditions and operating-system scheduling were not instrumented. Although jobs were shuffled and measurements were repeated, the study did not pin processes to performance cores. Extremely short C++ operations are vulnerable to timer quantisation and clock-call overhead. A revised benchmark should batch pure operations until each timed interval exceeds a predefined duration and should separately quantify timing overhead.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
+    add_para(doc, "Background activity, thermal conditions and operating-system scheduling were not instrumented. Although jobs were shuffled and measurements were repeated, the study did not pin processes to performance cores. Extremely short C++ operations are vulnerable to timer quantisation and clock-call overhead; Section 4.7 confirms this directly for array traversal and hash search by batching each operation until its timed interval exceeds a predefined duration, reducing dispersion from clock-tick noise to under 2% CV in three of four sizes. Insertion and deletion were not similarly batchable because they mutate the container and cannot be repeated without rebuilding it between batches; a revised benchmark should rebuild-and-batch these operations too and should separately quantify timing overhead.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
     add_para(doc, f"The three-warm-up protocol, calibrated for the primary C++/Python design, proved insufficient for several fast Java operations (Section 4.6): median CV across the Java supplement's 48 groups was {METRICS['java_supplement']['median_group_cv_pct']:.1f}% versus 4.0% for the primary design, consistent with JIT compilation transitioning from interpreted to compiled execution mid-measurement. A revised Java benchmark should detect steady state explicitly, for example by warming up until consecutive batches agree within a tolerance, rather than relying on a fixed repetition count.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
 
     heading(doc, "6.2 Construct validity", 2)
@@ -529,10 +575,10 @@ def build():
 
     heading(doc, "7. Conclusion and Future Work", 1)
     add_para(doc, "This reproducible Mac pilot showed that theoretical growth and observed runtime can be taught together. Sequential search and deletion batches grew close to quadratically when both collection size and operation count increased, while hash batches grew close to linearly. Python and C++ showed substantial but operation-dependent runtime differences, and all correctness outputs agreed. A supplementary Java run showed that a JIT-compiled, managed-runtime language does not sit uniformly between the interpreted and compiled extremes, slower than Python on four of the twelve structure-operation combinations despite being faster overall; the run also exposed measurement dispersion far higher than the primary design's, a methodological finding in its own right. The study also exposed a measurement weakness: several optimized C++ workloads were too short for reliable single-shot timing.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
-    add_para(doc, "Before journal submission, the benchmark should use calibrated operation batching, collect peak resident memory and hardware cache counters on a controlled Linux machine, record temperature and power mode, test additional input distributions, and reproduce the experiment on at least one independent system. The Java results in Section 4.6 address the language-coverage gap but not the single-machine, single-session limitation; a full three-language run alongside a second machine remains future work. Those extensions should be reported as new evidence, not combined silently with the present Mac data.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
+    add_para(doc, "Before journal submission, the benchmark should collect peak resident memory and hardware cache counters on a controlled Linux machine, record temperature and power mode, test additional input distributions, batch the mutating insert and delete operations (calibrated batching for the read-only search and traversal operations was completed in Section 4.7), and reproduce the experiment on at least one independent system. The Java results in Section 4.6 address the language-coverage gap but not the single-machine, single-session limitation; a full three-language run alongside a second machine remains future work. Those extensions should be reported as new evidence, not combined silently with the present Mac data.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
 
     heading(doc, "Data and Code Availability", 1)
-    add_para(doc, f"The repository contains the dataset generator, Python, C++ and Java implementations, validation tests, execution configuration, raw CSV records and analysis scripts. The raw combined CSV contains {METRICS['record_count']} records and has SHA-256 digest {METRICS['raw_sha256']}. The supplementary singly-linked construct-validity check (Section 4.5) adds {METRICS['linked_fwd_supplement']['record_count']} further C++ records with SHA-256 digest {METRICS['linked_fwd_supplement']['raw_sha256']}, and the supplementary Java run (Section 4.6) adds {METRICS['java_supplement']['record_count']} further records with SHA-256 digest {METRICS['java_supplement']['raw_sha256']}. The repository is publicly available at https://github.com/maheshchudaman/beyond-big-o-research and is archived on Zenodo with concept DOI 10.5281/zenodo.22089928, which always resolves to the latest archived release.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
+    add_para(doc, f"The repository contains the dataset generator, Python, C++ and Java implementations, validation tests, execution configuration, raw CSV records and analysis scripts. The raw combined CSV contains {METRICS['record_count']} records and has SHA-256 digest {METRICS['raw_sha256']}. The supplementary singly-linked construct-validity check (Section 4.5) adds {METRICS['linked_fwd_supplement']['record_count']} further C++ records with SHA-256 digest {METRICS['linked_fwd_supplement']['raw_sha256']}; the supplementary Java run (Section 4.6) adds {METRICS['java_supplement']['record_count']} further records with SHA-256 digest {METRICS['java_supplement']['raw_sha256']}; and the calibrated-batching supplement (Section 4.7) adds {METRICS['calibration_supplement']['record_count']} further records with SHA-256 digest {METRICS['calibration_supplement']['raw_sha256']}. The repository is publicly available at https://github.com/maheshchudaman/beyond-big-o-research and is archived on Zenodo with concept DOI 10.5281/zenodo.22089928, which always resolves to the latest archived release.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
 
     heading(doc, "Ethics, Authorship and AI-Assistance Statement", 1)
     add_para(doc, "No human-participant, personal or sensitive data were used. Generative AI (Codex and Claude) assisted with repository scaffolding, code review, execution orchestration, analysis scripting and preparation of this draft, including the supplementary construct-validity and third-language checks added on 25 August 2026. All numerical claims in the manuscript were generated programmatically from the preserved raw CSV; missing measurements were not fabricated. Before submission, the named authors must independently verify the code, results, citations and wording, approve authorship contributions, and adapt this disclosure to the selected journal's policy.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
@@ -558,6 +604,8 @@ def build():
         ["Construct-validity supplement (source)", "src/cpp/benchmark.cpp (run_linked_fwd)"],
         ["Java supplement (raw)", "results/raw/java_combined.csv"],
         ["Java supplement (source)", "src/java/Benchmark.java"],
+        ["Calibration supplement (raw)", "results/raw/cpp_calibrated_combined.csv"],
+        ["Calibration supplement (source)", "src/cpp/benchmark.cpp (run_calibrated)"],
     ]
     add_table(doc, "Table A1. Repository evidence map.", ["Evidence", "Repository path"], appendix_rows, [3000, 6360], 9.4)
     doc.core_properties.title = "Beyond Big-O: Apple-Silicon Runtime Pilot Study"

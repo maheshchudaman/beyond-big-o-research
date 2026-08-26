@@ -567,5 +567,86 @@
         "traverse"
       ]
     ]
+  },
+  "calibration_supplement": {
+    "record_count": 80,
+    "raw_sha256": "243ff2cd1301c90169059664a4ded1584e060dc7aaa00e1ad497304d2a1e92f9",
+    "threshold_ns": 1000000,
+    "by_size": {
+      "array": {
+        "traverse": {
+          "1000": {
+            "single_shot_ns": 42.0,
+            "calibrated_median_ns": 47.0,
+            "calibrated_cv_pct": 11.86108608789571,
+            "batch_sizes": [
+              "2048"
+            ]
+          },
+          "5000": {
+            "single_shot_ns": 208.0,
+            "calibrated_median_ns": 190.5,
+            "calibrated_cv_pct": 1.1583731999735976,
+            "batch_sizes": [
+              "2048"
+            ]
+          },
+          "10000": {
+            "single_shot_ns": 417.0,
+            "calibrated_median_ns": 377.5,
+            "calibrated_cv_pct": 1.1770442396926766,
+            "batch_sizes": [
+              "2048"
+            ]
+          },
+          "25000": {
+            "single_shot_ns": 958.0,
+            "calibrated_median_ns": 937.0,
+            "calibrated_cv_pct": 1.5807654812293799,
+            "batch_sizes": [
+              "2048"
+            ]
+          }
+        }
+      },
+      "hash": {
+        "search": {
+          "1000": {
+            "single_shot_ns": 0.0,
+            "calibrated_median_ns": 16.0,
+            "calibrated_cv_pct": 2.9188380222648664,
+            "batch_sizes": [
+              "2048"
+            ]
+          },
+          "5000": {
+            "single_shot_ns": 166.5,
+            "calibrated_median_ns": 133.5,
+            "calibrated_cv_pct": 2.095808383233533,
+            "batch_sizes": [
+              "2048"
+            ]
+          },
+          "10000": {
+            "single_shot_ns": 333.0,
+            "calibrated_median_ns": 265.5,
+            "calibrated_cv_pct": 1.0958106268772823,
+            "batch_sizes": [
+              "2048"
+            ]
+          },
+          "25000": {
+            "single_shot_ns": 708.0,
+            "calibrated_median_ns": 688.0,
+            "calibrated_cv_pct": 1.2345763174327367,
+            "batch_sizes": [
+              "2048"
+            ]
+          }
+        }
+      }
+    },
+    "median_group_cv_pct": 1.4076708993310583,
+    "max_group_cv_pct": 11.86108608789571
   }
 }

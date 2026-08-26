@@ -1,0 +1,11 @@
+language,structure,dataset,n,operation,repeat,batch_size,elapsed_ns,per_op_ns,hits,checksum
+cpp,hash,dataset_10000.txt,10000,search,0,4096,1088167,265,50,0
+cpp,hash,dataset_10000.txt,10000,search,1,4096,1069542,261,50,0
+cpp,hash,dataset_10000.txt,10000,search,2,4096,1099875,268,50,0
+cpp,hash,dataset_10000.txt,10000,search,3,4096,1084459,264,50,0
+cpp,hash,dataset_10000.txt,10000,search,4,4096,1116083,272,50,0
+cpp,hash,dataset_10000.txt,10000,search,5,4096,1092792,266,50,0
+cpp,hash,dataset_10000.txt,10000,search,6,4096,1100666,268,50,0
+cpp,hash,dataset_10000.txt,10000,search,7,4096,1095834,267,50,0
+cpp,hash,dataset_10000.txt,10000,search,8,4096,1077958,263,50,0
+cpp,hash,dataset_10000.txt,10000,search,9,4096,1088084,265,50,0
