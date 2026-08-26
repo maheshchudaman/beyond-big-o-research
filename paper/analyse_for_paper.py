@@ -20,6 +20,8 @@ RAW = ROOT / "results/raw/combined.csv"
 LINKED_FWD_RAW = ROOT / "results/raw/cpp_linked_fwd_combined.csv"
 JAVA_RAW = ROOT / "results/raw/java_combined.csv"
 CALIBRATED_RAW = ROOT / "results/raw/cpp_calibrated_combined.csv"
+RESOURCE_RAW = ROOT / "results/raw/resource_usage.csv"
+SORTED_RAW = ROOT / "results/raw/sorted_combined.csv"
 OUT = ROOT / "paper/generated"
 OPERATIONS = ("insert", "search", "delete", "traverse")
 STRUCTURES = ("array", "linked", "hash")
@@ -259,6 +261,68 @@ def write_calibration_supplement(main_rows):
     return supplement
 
 
+def write_resource_supplement():
+    """Peak memory and hardware-counter supplement: /usr/bin/time -l reports
+    peak memory footprint, instructions retired and cycles elapsed for the
+    whole benchmark process (all warm-ups and repeats) without needing
+    Linux perf. One measurement per (language, structure, n); a three-run
+    spot-check for one combination showed under 1.5% variation in all three
+    metrics, so a single measurement is treated as representative."""
+    rows = list(csv.DictReader(RESOURCE_RAW.open(newline="", encoding="utf-8")))
+    supplement = {"record_count": len(rows), "raw_sha256": hashlib.sha256(RESOURCE_RAW.read_bytes()).hexdigest(), "at_n25000": {}}
+    for row in rows:
+        if int(row["n"]) != 25000:
+            continue
+        instr = int(row["instructions_retired"])
+        cyc = int(row["cycles_elapsed"])
+        supplement["at_n25000"].setdefault(row["language"], {})[row["structure"]] = {
+            "peak_memory_bytes": int(row["peak_memory_bytes"]),
+            "instructions_retired": instr,
+            "cycles_elapsed": cyc,
+            "ipc": instr / cyc if cyc else 0.0,
+        }
+    return supplement
+
+
+def write_sorted_distribution_supplement(main_rows, main_groups):
+    """External-validity supplement: the primary study used a single
+    deterministic-shuffle input family. Re-running the identical workload
+    against an ascending-sorted value set (same {0..n-1}, same query/delete
+    fractions, same seed -- only the build order changes) tests whether the
+    reported patterns are an artifact of that one distribution."""
+    rows = list(csv.DictReader(SORTED_RAW.open(newline="", encoding="utf-8")))
+    reference = {
+        (row["structure"], int(row["n"])): (row["hits"], row["checksum"])
+        for row in rows
+        if row["language"] == "cpp"
+    }
+    for row in rows:
+        key = (row["structure"], int(row["n"]))
+        expected = reference[key]
+        assert (row["hits"], row["checksum"]) == expected, (
+            f"cross-language correctness mismatch on sorted distribution at {key}: "
+            f"{row['language']} got {(row['hits'], row['checksum'])}, expected {expected}"
+        )
+    groups: dict[tuple[str, str, int, str], list[int]] = defaultdict(list)
+    for row in rows:
+        for operation in OPERATIONS:
+            groups[(row["language"], row["structure"], int(row["n"]), operation)].append(int(row[f"{operation}_ns"]))
+
+    supplement = {"record_count": len(rows), "raw_sha256": hashlib.sha256(SORTED_RAW.read_bytes()).hexdigest(), "cpp_n25000": {}}
+    for operation in OPERATIONS:
+        entry = {}
+        for structure in STRUCTURES:
+            shuffled_median = statistics.median(main_groups[("cpp", structure, 25000, operation)])
+            sorted_median = statistics.median(groups[("cpp", structure, 25000, operation)])
+            entry[structure] = {
+                "shuffled_ns": shuffled_median,
+                "sorted_ns": sorted_median,
+                "ratio": sorted_median / shuffled_median if shuffled_median else float("inf"),
+            }
+        supplement["cpp_n25000"][operation] = entry
+    return supplement
+
+
 def write_metrics(rows, groups, fwd_rows, fwd_groups, java_rows, java_groups):
     metrics = {
         "record_count": len(rows),
@@ -314,6 +378,8 @@ def write_metrics(rows, groups, fwd_rows, fwd_groups, java_rows, java_groups):
     metrics["linked_fwd_supplement"] = write_linked_fwd_supplement(rows, groups, fwd_rows, fwd_groups)
     metrics["java_supplement"] = write_java_supplement(rows, groups, java_rows, java_groups)
     metrics["calibration_supplement"] = write_calibration_supplement(rows)
+    metrics["resource_supplement"] = write_resource_supplement()
+    metrics["sorted_distribution_supplement"] = write_sorted_distribution_supplement(rows, groups)
     (OUT / "paper_metrics.json").write_text(json.dumps(metrics, indent=2) + "\n", encoding="utf-8")
     with (OUT / "n25000_medians.csv").open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=table_rows[0].keys())

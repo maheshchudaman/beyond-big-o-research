@@ -1,0 +1,9 @@
+=== Thermal/power snapshot, captured 2026-08-26T06:52:09Z ===
+--- pmset -g therm ---
+Note: No thermal warning level has been recorded
+Note: No performance warning level has been recorded
+Note: No CPU power status has been recorded
+--- pmset -g (power settings in use) ---
+System-wide power settings:
+Currently in use:
+ standby              1

@@ -1,0 +1,11 @@
+language,structure,dataset,n,repeat,insert_ns,search_ns,delete_ns,traverse_ns,hits,checksum
+cpp,linked,dataset_1000.txt,1000,0,11375,7000,4667,875,5,494224
+cpp,linked,dataset_1000.txt,1000,1,11291,7292,4875,750,5,494224
+cpp,linked,dataset_1000.txt,1000,2,11250,7292,4750,875,5,494224
+cpp,linked,dataset_1000.txt,1000,3,11209,7250,4875,1042,5,494224
+cpp,linked,dataset_1000.txt,1000,4,11333,7292,4791,833,5,494224
+cpp,linked,dataset_1000.txt,1000,5,11208,7208,4333,917,5,494224
+cpp,linked,dataset_1000.txt,1000,6,11209,7291,4875,917,5,494224
+cpp,linked,dataset_1000.txt,1000,7,11291,6834,4250,959,5,494224
+cpp,linked,dataset_1000.txt,1000,8,11250,7291,4625,917,5,494224
+cpp,linked,dataset_1000.txt,1000,9,11250,6542,4875,916,5,494224
