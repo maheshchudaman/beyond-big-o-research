@@ -22,6 +22,7 @@ JAVA_RAW = ROOT / "results/raw/java_combined.csv"
 CALIBRATED_RAW = ROOT / "results/raw/cpp_calibrated_combined.csv"
 RESOURCE_RAW = ROOT / "results/raw/resource_usage.csv"
 SORTED_RAW = ROOT / "results/raw/sorted_combined.csv"
+WINDOWS_RAW = ROOT / "results/raw/windows_combined.csv"
 OUT = ROOT / "paper/generated"
 OPERATIONS = ("insert", "search", "delete", "traverse")
 STRUCTURES = ("array", "linked", "hash")
@@ -323,6 +324,63 @@ def write_sorted_distribution_supplement(main_rows, main_groups):
     return supplement
 
 
+def write_windows_supplement(main_rows, main_groups):
+    """Independent second-system reproduction: the identical protocol (same
+    config/experiment.json -- seed, sizes, query/delete fractions, warmups,
+    repeats -- and the same source) re-run on a second, independently owned
+    machine: Windows 11 (AMD64), GCC 16.2.0 via MinGW-w64, CPython 3.12.10,
+    rather than the primary Apple Silicon Mac (macOS, Apple Clang, CPython
+    3.13). Tests whether the primary study's qualitative pattern is a
+    single-machine artifact (see Section 6.3)."""
+    rows = list(csv.DictReader(WINDOWS_RAW.open(newline="", encoding="utf-8")))
+    reference = {
+        (row["structure"], int(row["n"])): (row["hits"], row["checksum"])
+        for row in main_rows
+        if row["language"] == "python"
+    }
+    for row in rows:
+        key = (row["structure"], int(row["n"]))
+        expected = reference[key]
+        assert (row["hits"], row["checksum"]) == expected, (
+            f"Windows correctness mismatch at {key}: got {(row['hits'], row['checksum'])}, expected {expected}"
+        )
+    groups: dict[tuple[str, str, int, str], list[int]] = defaultdict(list)
+    for row in rows:
+        for operation in OPERATIONS:
+            groups[(row["language"], row["structure"], int(row["n"]), operation)].append(int(row[f"{operation}_ns"]))
+
+    supplement = {
+        "record_count": len(rows),
+        "raw_sha256": hashlib.sha256(WINDOWS_RAW.read_bytes()).hexdigest(),
+        "platform": "Windows 11 (AMD64), GCC 16.2.0 via MinGW-w64, CPython 3.12.10",
+        "n25000": {},
+    }
+    direction_flips = []
+    windows_ratios = []
+    for structure in STRUCTURES:
+        supplement["n25000"][structure] = {}
+        for operation in OPERATIONS:
+            win_cpp = statistics.median(groups[("cpp", structure, 25000, operation)])
+            win_python = statistics.median(groups[("python", structure, 25000, operation)])
+            mac_cpp = statistics.median(main_groups[("cpp", structure, 25000, operation)])
+            mac_python = statistics.median(main_groups[("python", structure, 25000, operation)])
+            win_ratio = win_python / win_cpp
+            mac_ratio = mac_python / mac_cpp
+            if (win_ratio > 1) != (mac_ratio > 1):
+                direction_flips.append([structure, operation])
+            windows_ratios.append(win_ratio)
+            supplement["n25000"][structure][operation] = {
+                "windows_cpp_median_ms": win_cpp / 1_000_000,
+                "windows_python_median_ms": win_python / 1_000_000,
+                "windows_python_to_cpp_ratio": win_ratio,
+                "mac_python_to_cpp_ratio": mac_ratio,
+                "windows_cpp_to_mac_cpp_ratio": win_cpp / mac_cpp,
+            }
+    supplement["direction_flips"] = direction_flips
+    supplement["windows_ratio_range_n25000"] = [min(windows_ratios), max(windows_ratios)]
+    return supplement
+
+
 def write_metrics(rows, groups, fwd_rows, fwd_groups, java_rows, java_groups):
     metrics = {
         "record_count": len(rows),
@@ -380,6 +438,7 @@ def write_metrics(rows, groups, fwd_rows, fwd_groups, java_rows, java_groups):
     metrics["calibration_supplement"] = write_calibration_supplement(rows)
     metrics["resource_supplement"] = write_resource_supplement()
     metrics["sorted_distribution_supplement"] = write_sorted_distribution_supplement(rows, groups)
+    metrics["windows_supplement"] = write_windows_supplement(rows, groups)
     (OUT / "paper_metrics.json").write_text(json.dumps(metrics, indent=2) + "\n", encoding="utf-8")
     with (OUT / "n25000_medians.csv").open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=table_rows[0].keys())

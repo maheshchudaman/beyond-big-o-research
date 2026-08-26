@@ -788,5 +788,107 @@
         }
       }
     }
+  },
+  "windows_supplement": {
+    "record_count": 240,
+    "raw_sha256": "bb8e7df67be539ff812c8175bfe77946d6ec3d069ac9757fa883be7b4596368e",
+    "platform": "Windows 11 (AMD64), GCC 16.2.0 via MinGW-w64, CPython 3.12.10",
+    "n25000": {
+      "array": {
+        "insert": {
+          "windows_cpp_median_ms": 0.0015,
+          "windows_python_median_ms": 0.02525,
+          "windows_python_to_cpp_ratio": 16.833333333333332,
+          "mac_python_to_cpp_ratio": 4.755580952380952,
+          "windows_cpp_to_mac_cpp_ratio": 0.22857142857142856
+        },
+        "search": {
+          "windows_cpp_median_ms": 0.60385,
+          "windows_python_median_ms": 16.1599,
+          "windows_python_to_cpp_ratio": 26.761447379316056,
+          "mac_python_to_cpp_ratio": 11.498577638420215,
+          "windows_cpp_to_mac_cpp_ratio": 0.4236739622408518
+        },
+        "delete": {
+          "windows_cpp_median_ms": 0.5447,
+          "windows_python_median_ms": 19.26855,
+          "windows_python_to_cpp_ratio": 35.37460987699651,
+          "mac_python_to_cpp_ratio": 15.304632075291227,
+          "windows_cpp_to_mac_cpp_ratio": 0.5082932423687193
+        },
+        "traverse": {
+          "windows_cpp_median_ms": 0.0051,
+          "windows_python_median_ms": 0.0619,
+          "windows_python_to_cpp_ratio": 12.137254901960784,
+          "mac_python_to_cpp_ratio": 91.68423799582463,
+          "windows_cpp_to_mac_cpp_ratio": 5.323590814196242
+        }
+      },
+      "linked": {
+        "insert": {
+          "windows_cpp_median_ms": 0.59595,
+          "windows_python_median_ms": 3.14935,
+          "windows_python_to_cpp_ratio": 5.284587633190704,
+          "mac_python_to_cpp_ratio": 15.686919893963296,
+          "windows_cpp_to_mac_cpp_ratio": 2.7691750093513963
+        },
+        "search": {
+          "windows_cpp_median_ms": 9.91205,
+          "windows_python_median_ms": 106.80615,
+          "windows_python_to_cpp_ratio": 10.77538450673675,
+          "mac_python_to_cpp_ratio": 21.590885719657727,
+          "windows_cpp_to_mac_cpp_ratio": 1.7352585175518973
+        },
+        "delete": {
+          "windows_cpp_median_ms": 6.6497,
+          "windows_python_median_ms": 76.48025,
+          "windows_python_to_cpp_ratio": 11.501308329699084,
+          "mac_python_to_cpp_ratio": 20.518504158455528,
+          "windows_cpp_to_mac_cpp_ratio": 1.7768662947994256
+        },
+        "traverse": {
+          "windows_cpp_median_ms": 0.0515,
+          "windows_python_median_ms": 0.6205,
+          "windows_python_to_cpp_ratio": 12.048543689320388,
+          "mac_python_to_cpp_ratio": 24.910440983551414,
+          "windows_cpp_to_mac_cpp_ratio": 1.732315247737899
+        }
+      },
+      "hash": {
+        "insert": {
+          "windows_cpp_median_ms": 0.69465,
+          "windows_python_median_ms": 1.0644,
+          "windows_python_to_cpp_ratio": 1.5322824443964587,
+          "mac_python_to_cpp_ratio": 2.2306435799415336,
+          "windows_cpp_to_mac_cpp_ratio": 2.4993029008320216
+        },
+        "search": {
+          "windows_cpp_median_ms": 0.00095,
+          "windows_python_median_ms": 0.0118,
+          "windows_python_to_cpp_ratio": 12.421052631578947,
+          "mac_python_to_cpp_ratio": 13.565677966101696,
+          "windows_cpp_to_mac_cpp_ratio": 1.3418079096045197
+        },
+        "delete": {
+          "windows_cpp_median_ms": 0.00685,
+          "windows_python_median_ms": 0.0116,
+          "windows_python_to_cpp_ratio": 1.6934306569343065,
+          "mac_python_to_cpp_ratio": 1.8597691757736696,
+          "windows_cpp_to_mac_cpp_ratio": 1.3992442038606885
+        },
+        "traverse": {
+          "windows_cpp_median_ms": 0.05455,
+          "windows_python_median_ms": 0.0905,
+          "windows_python_to_cpp_ratio": 1.6590284142988085,
+          "mac_python_to_cpp_ratio": 3.683627118644068,
+          "windows_cpp_to_mac_cpp_ratio": 1.8491525423728814
+        }
+      }
+    },
+    "direction_flips": [],
+    "windows_ratio_range_n25000": [
+      1.5322824443964587,
+      35.37460987699651
+    ]
   }
 }

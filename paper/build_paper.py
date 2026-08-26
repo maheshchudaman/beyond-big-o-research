@@ -339,13 +339,15 @@ def build():
         "twelve combinations, though the widest ratios coincide with measurement dispersion far higher than the "
         "primary design (median CV 38.6% vs 4.0%); low-dispersion combinations gave a narrower, more defensible "
         "1.49x-1.64x range. Calibrated batching (Section 4.7) resolved the two resolution-limited C++ groups flagged "
-        "since the first draft, cutting their dispersion from clock-tick noise to under 2% CV. A final supplement "
+        "since the first draft, cutting their dispersion from clock-tick noise to under 2% CV. A further supplement "
         "(Section 4.8) added peak memory, coarse instruction/cycle counters, a thermal snapshot and a second "
         "input-distribution family: search, deletion and traversal were robust to distribution, but C++ insertion "
-        "was not, for reasons not yet identified. The findings support teaching Big-O together with "
-        "implementation-aware measurement, while the single-machine scope, absence of literal cache-miss counters, "
-        "and the unresolved insertion-distribution effect keep this a pilot rather than a final general-purpose "
-        "benchmark."
+        "was not, for reasons not yet identified. An independent reproduction on a separately owned Windows machine "
+        "(Section 4.9) then confirmed C++ was faster than Python in all twelve combinations there too, though the "
+        "magnitude of the gap shifted substantially by structure and operation rather than transferring unchanged. "
+        "The findings support teaching Big-O together with implementation-aware measurement, while the absence of "
+        "literal cache-miss counters, the small two-machine sample, and the unresolved insertion-distribution effect "
+        "keep this a pilot rather than a final general-purpose benchmark."
     )
     add_para(doc, abstract, align=WD_ALIGN_PARAGRAPH.JUSTIFY)
     add_rich_para(doc, [("Keywords: ", {"bold": True}), ("data structures; Big-O; empirical algorithmics; Python; C++; Java; microbenchmarking; reproducibility; construct validity", {})], align=WD_ALIGN_PARAGRAPH.LEFT)
@@ -357,7 +359,8 @@ def build():
     bullet(doc, "Java held a surprise: on 4 of the 12 tasks tested, it was actually slower than Python, and its speed bounced around from run to run far more than Python's or C++'s did.")
     bullet(doc, "A few C++ operations finished faster than the computer's own stopwatch could reliably measure. Running each one thousands of times in a row and averaging the result solved this.")
     bullet(doc, "The most interesting new discovery: for almost every operation, it did not matter whether the data started out shuffled or already sorted -- the speed was about the same either way. The one exception was inserting data into a C++ container, where the speed changed noticeably depending on the input order, and the reason is not yet known. That is reported honestly as an open question rather than guessed at.")
-    bullet(doc, "Two things are left for a follow-up study: testing this on a second, different computer, and taking more detailed processor-level measurements. Both need equipment beyond the single laptop used here.")
+    bullet(doc, "We also tried this on a second, completely different computer -- a Windows PC, run by the paper's co-author -- instead of relying on just the one Mac. The good news travelled: C++ was still faster than Python on every single task, on totally different hardware. But the exact \"how much faster\" numbers shifted quite a bit from computer to computer, so the direction of the finding held up, while the precise numbers are specific to each machine.")
+    bullet(doc, "One thing is still left for a follow-up study: taking more detailed processor-level measurements, which needs equipment beyond the two computers used here.")
 
     heading(doc, "1. Introduction", 1)
     add_para(doc, f"Big-O notation provides a machine-independent description of growth as input size increases. It is indispensable for algorithm design, yet it intentionally suppresses constant factors, representation costs and hardware effects [{REF['cormen']}]. Consequently, two implementations with the same asymptotic class can differ substantially in observed runtime, while a theoretically favourable structure may carry a higher construction or traversal cost for a particular workload.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
@@ -377,7 +380,8 @@ def build():
     bullet(doc, "An empirical test of whether the C++/Python linked-container mismatch inflates the observed language gap, rather than leaving that concern as an unverified caveat.")
     bullet(doc, "A third-language check that re-runs the full workload under Java, testing whether the Python/C++ pattern generalises rather than leaving Java's absence as an unaddressed limitation.")
     bullet(doc, "A calibrated-batching supplement that resolves the two resolution-limited C++ groups into stable, low-dispersion estimates, converting an open measurement caveat into a quantified one.")
-    bullet(doc, "Peak-memory, coarse hardware-counter and second-input-distribution supplements that close four of the six original future-work items within a single Mac's reach, leaving only literal cache-miss counters and independent-system reproduction as genuinely out of scope here.")
+    bullet(doc, "Peak-memory, coarse hardware-counter and second-input-distribution supplements that close four of the six original future-work items within a single Mac's reach.")
+    bullet(doc, "An independent reproduction on a second, separately owned Windows machine, testing whether the primary Python/C++ comparison is an Apple Silicon artifact rather than leaving single-machine scope as an unaddressed limitation.")
 
     heading(doc, "2. Background and Related Work", 1)
     add_para(doc, f"The analysis of algorithms separates growth rate from implementation detail [{REF['cormen']}]. Experimental algorithmics complements that abstraction by examining implementations on specified workloads and machines. Algorithm engineering has been described as a methodology connecting design, implementation, experimentation and refinement [{REF['sanders']}]. This perspective motivates reporting sufficient detail to reproduce not only the code but also the experimental conditions.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
@@ -620,6 +624,45 @@ def build():
     )
     add_table(doc, "Table 8. C++ insertion time under the two input distributions at n = 25,000.", ["Structure", "Shuffled", "Sorted", "Ratio"], dist_rows, [2340, 2340, 2340, 2340], 9.0)
 
+    heading(doc, "4.9 Independent second-system reproduction", 2)
+    win = METRICS["windows_supplement"]
+    add_para(
+        doc,
+        "To test whether the primary study's findings are specific to a single machine, the identical protocol -- "
+        "same source code, seed, dataset sizes, query/delete fractions, warm-ups and repetitions -- was re-run by "
+        "the second author on an independently owned Windows 11 desktop (AMD64, GCC 16.2.0 via MinGW-w64, CPython "
+        "3.12.10), rather than the primary Apple Silicon Mac (macOS, Apple Clang, CPython 3.13). All 240 records "
+        "reproduced the same search-hit counts and post-deletion checksums as the primary run.",
+        align=WD_ALIGN_PARAGRAPH.JUSTIFY,
+    )
+    win_rows = []
+    for structure in ("array", "linked", "hash"):
+        for operation in ("insert", "search", "delete", "traverse"):
+            e = win["n25000"][structure][operation]
+            win_rows.append([
+                structure.title(), operation.title(),
+                f"{e['mac_python_to_cpp_ratio']:.2f}x", f"{e['windows_python_to_cpp_ratio']:.2f}x",
+                f"{e['windows_cpp_to_mac_cpp_ratio']:.2f}x",
+            ])
+    add_table(doc, "Table 9. Python-to-C++ ratio at n = 25,000 on both machines, and C++'s own Windows-to-Mac speed ratio.", ["Structure", "Operation", "Mac ratio", "Windows ratio", "Win C++ / Mac C++"], win_rows, [1500, 1500, 2120, 2120, 2120], 8.8)
+    add_para(
+        doc,
+        "C++ was faster than Python in all twelve structure-operation combinations on both machines -- the study's "
+        "central qualitative finding held under a different processor architecture (Apple Silicon ARM64 vs. x86-64), "
+        "operating system and C++ toolchain. The magnitude did not transfer as cleanly. Array traversal's extreme "
+        "91.68x Mac ratio -- already flagged in Section 3.4 as resolution-limited, a sub-microsecond C++ median "
+        "vulnerable to timer quantisation -- shrank to a still-substantial but far less extreme 12.14x on Windows, "
+        "consistent with that caveat rather than contradicting it. The linked structure moved the other way: C++ "
+        "itself ran 1.7-2.8x slower on Windows/MinGW than on the Mac for every linked operation (rightmost column), "
+        "narrowing the Windows Python/C++ ratio relative to the Mac's; this is plausibly a toolchain or allocator "
+        "difference between MinGW's libstdc++ and Apple's libc++, but was not investigated further and is left as "
+        "future work. Hash gave the most stable ratios across machines. One additional machine does not establish "
+        "that the study's exact magnitudes generalise to arbitrary hardware, but the central claim -- C++ "
+        "consistently faster than Python across these operations -- no longer rests on a single machine's "
+        "measurements alone.",
+        align=WD_ALIGN_PARAGRAPH.JUSTIFY,
+    )
+
     heading(doc, "5. Discussion", 1)
     heading(doc, "5.1 Big-O explained, not contradicted", 2)
     add_para(doc, "The results do not show a failure of asymptotic analysis. Instead, they demonstrate why the unit of analysis must be stated carefully. A single sequential search is O(n), but this experiment schedules 0.01n searches, creating an O(n^2) batch. A hash lookup is expected O(1) on average, and the corresponding O(n) batch grew close to linearly. The empirical exponents therefore connect measured behaviour to the composed workload rather than replacing theory.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
@@ -639,15 +682,15 @@ def build():
     add_para(doc, "The structures are functionally comparable but not internally identical. Python's custom singly linked list differs from C++ std::list, which is typically doubly linked. Python list holds object references, whereas std::vector<int> stores primitive integers contiguously. Consequently, the experiment evaluates idiomatic implementation conditions rather than isolating a pure language effect. This concern is tested empirically in Section 4.5, which reruns the C++ linked benchmark with the singly-linked std::forward_list; the resulting ratios do not shrink under the more closely matched comparison, indicating the linkage mismatch is not the source of the observed language gap. Peak memory and two coarse hardware counters were measured on this Mac in Section 4.8; literal L1/L2/L3 cache hit and miss counts still require Linux perf and are not inferred in this paper.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
 
     heading(doc, "6.3 External and conclusion validity", 2)
-    add_para(doc, "One Apple M2 laptop, one Python version and one C++ toolchain cannot represent other processors, operating systems, compilers or runtime configurations; no independent second system has reproduced any part of this study. Only four sizes were examined. Section 4.8 adds a second, ascending-sorted input family alongside the primary deterministic shuffle, but two families remain a small basis for claims about input-distribution robustness in general. Ten repetitions support descriptive stability but not broad population inference. Java was not executed in the primary 23 August 2026 session because no working JDK was available; Section 4.6 reports a supplementary Java run added on 25 August 2026 using a subsequently installed JDK on the same machine, so that check still shares this section's single-machine limitation. The conclusions are therefore restricted to this environment and protocol.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
+    add_para(doc, "One Apple M2 laptop, one Python version and one C++ toolchain cannot represent every processor, operating system, compiler or runtime configuration. Section 4.9 reproduced the primary comparison on one independent Windows machine and found the qualitative direction held everywhere, but the exact magnitudes did not transfer cleanly -- one additional machine still leaves broad hardware generalisation untested. Only four sizes were examined. Section 4.8 adds a second, ascending-sorted input family alongside the primary deterministic shuffle, but two families remain a small basis for claims about input-distribution robustness in general. Ten repetitions support descriptive stability but not broad population inference. Java was not executed in the primary 23 August 2026 session because no working JDK was available; Section 4.6 reports a supplementary Java run added on 25 August 2026 using a subsequently installed JDK on the same machine, so that check still shares the Mac's single-machine limitation. The conclusions are therefore restricted to this environment and protocol, now partially cross-checked rather than resting on it alone.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
 
     heading(doc, "7. Conclusion and Future Work", 1)
-    add_para(doc, "This reproducible Mac pilot showed that theoretical growth and observed runtime can be taught together. Sequential search and deletion batches grew close to quadratically when both collection size and operation count increased, while hash batches grew close to linearly. Python and C++ showed substantial but operation-dependent runtime differences, and all correctness outputs agreed. A supplementary Java run showed that a JIT-compiled, managed-runtime language does not sit uniformly between the interpreted and compiled extremes, slower than Python on four of the twelve structure-operation combinations despite being faster overall; the run also exposed measurement dispersion far higher than the primary design's, a methodological finding in its own right. The study also exposed a measurement weakness: several optimized C++ workloads were too short for reliable single-shot timing.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
-    add_para(doc, "This revision closed four of the six original future-work items within a single Mac's reach: Section 4.6 added Java as a third language; Section 4.7 resolved the sub-microsecond timing caveat for read-only operations through calibrated batching; and Section 4.8 added peak memory, two coarse hardware counters, a thermal/power snapshot and a second input-distribution family -- the last of which surfaced a genuine new finding, that C++ insertion, unlike search, deletion and traversal, responds substantially to input order.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
-    add_note(doc, "Future scope", "Three extensions define the next study rather than this one's shortfall: batching the mutating insert and delete operations to explain the input-order sensitivity Section 4.8 surfaced -- harder than the read-only case, since it requires rebuilding the container between batches; reproducing this protocol on an independent second system; and measuring literal L1/L2/L3 cache hit and miss counts, which require Linux perf and are unavailable on this Mac. Each should be reported as new evidence, not combined silently with the present data.", risk=False)
+    add_para(doc, "This reproducible pilot showed that theoretical growth and observed runtime can be taught together. Sequential search and deletion batches grew close to quadratically when both collection size and operation count increased, while hash batches grew close to linearly. Python and C++ showed substantial but operation-dependent runtime differences, and all correctness outputs agreed. A supplementary Java run showed that a JIT-compiled, managed-runtime language does not sit uniformly between the interpreted and compiled extremes, slower than Python on four of the twelve structure-operation combinations despite being faster overall; the run also exposed measurement dispersion far higher than the primary design's, a methodological finding in its own right. An independent Windows reproduction (Section 4.9) then confirmed the central Python/C++ comparison holds outside the original Mac, even as the exact magnitudes shifted. The study also exposed a measurement weakness: several optimized C++ workloads were too short for reliable single-shot timing.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
+    add_para(doc, "This revision closed five of the six original future-work items: Section 4.6 added Java as a third language; Section 4.7 resolved the sub-microsecond timing caveat for read-only operations through calibrated batching; Section 4.8 added peak memory, two coarse hardware counters, a thermal/power snapshot and a second input-distribution family -- the last of which surfaced a genuine new finding, that C++ insertion, unlike search, deletion and traversal, responds substantially to input order; and Section 4.9 reproduced the study on an independently owned second machine, holding the qualitative direction in all twelve combinations while revealing that the magnitudes do not transfer cleanly across hardware and toolchain.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
+    add_note(doc, "Future scope", "Two extensions define the next study rather than this one's shortfall: batching the mutating insert and delete operations to explain the input-order sensitivity Section 4.8 surfaced -- harder than the read-only case, since it requires rebuilding the container between batches; and measuring literal L1/L2/L3 cache hit and miss counts, which require Linux perf and were unavailable on either machine used here. Each should be reported as new evidence, not combined silently with the present data.", risk=False)
 
     heading(doc, "Data and Code Availability", 1)
-    add_para(doc, f"The repository contains the dataset generator, Python, C++ and Java implementations, validation tests, execution configuration, raw CSV records and analysis scripts. The raw combined CSV contains {METRICS['record_count']} records and has SHA-256 digest {METRICS['raw_sha256']}. The supplementary singly-linked construct-validity check (Section 4.5) adds {METRICS['linked_fwd_supplement']['record_count']} further C++ records with SHA-256 digest {METRICS['linked_fwd_supplement']['raw_sha256']}; the supplementary Java run (Section 4.6) adds {METRICS['java_supplement']['record_count']} further records with SHA-256 digest {METRICS['java_supplement']['raw_sha256']}; the calibrated-batching supplement (Section 4.7) adds {METRICS['calibration_supplement']['record_count']} further records with SHA-256 digest {METRICS['calibration_supplement']['raw_sha256']}; the resource-usage supplement (Section 4.8) adds {METRICS['resource_supplement']['record_count']} process-level records with SHA-256 digest {METRICS['resource_supplement']['raw_sha256']}; and the second-distribution supplement (Section 4.8) adds {METRICS['sorted_distribution_supplement']['record_count']} further records with SHA-256 digest {METRICS['sorted_distribution_supplement']['raw_sha256']}. The repository is publicly available at https://github.com/maheshchudaman/beyond-big-o-research and is archived on Zenodo with concept DOI 10.5281/zenodo.22089928, which always resolves to the latest archived release.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
+    add_para(doc, f"The repository contains the dataset generator, Python, C++ and Java implementations, validation tests, execution configuration, raw CSV records and analysis scripts. The raw combined CSV contains {METRICS['record_count']} records and has SHA-256 digest {METRICS['raw_sha256']}. The supplementary singly-linked construct-validity check (Section 4.5) adds {METRICS['linked_fwd_supplement']['record_count']} further C++ records with SHA-256 digest {METRICS['linked_fwd_supplement']['raw_sha256']}; the supplementary Java run (Section 4.6) adds {METRICS['java_supplement']['record_count']} further records with SHA-256 digest {METRICS['java_supplement']['raw_sha256']}; the calibrated-batching supplement (Section 4.7) adds {METRICS['calibration_supplement']['record_count']} further records with SHA-256 digest {METRICS['calibration_supplement']['raw_sha256']}; the resource-usage supplement (Section 4.8) adds {METRICS['resource_supplement']['record_count']} process-level records with SHA-256 digest {METRICS['resource_supplement']['raw_sha256']}; the second-distribution supplement (Section 4.8) adds {METRICS['sorted_distribution_supplement']['record_count']} further records with SHA-256 digest {METRICS['sorted_distribution_supplement']['raw_sha256']}; and the independent Windows reproduction (Section 4.9) adds {METRICS['windows_supplement']['record_count']} further records with SHA-256 digest {METRICS['windows_supplement']['raw_sha256']}. The repository is publicly available at https://github.com/maheshchudaman/beyond-big-o-research and is archived on Zenodo with concept DOI 10.5281/zenodo.22089928, which always resolves to the latest archived release.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
 
     heading(doc, "Ethics, Authorship and AI-Assistance Statement", 1)
     add_para(doc, "No human-participant, personal or sensitive data were used. Generative AI (Codex and Claude) assisted with repository scaffolding, code review, execution orchestration, analysis scripting and preparation of this draft, including the supplementary construct-validity and third-language checks added on 25 August 2026. All numerical claims in the manuscript were generated programmatically from the preserved raw CSV; missing measurements were not fabricated. Before submission, the named authors must independently verify the code, results, citations and wording, approve authorship contributions, and adapt this disclosure to the selected journal's policy.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
@@ -679,6 +722,8 @@ def build():
         ["Thermal/power snapshot", "results/raw/thermal_snapshot.txt"],
         ["Second-distribution supplement (raw)", "results/raw/sorted_combined.csv"],
         ["Second-distribution supplement (source)", "scripts/generate_datasets_sorted.py"],
+        ["Windows reproduction (raw)", "results/raw/windows_combined.csv"],
+        ["Windows reproduction (environment)", "results/raw/windows_environment.json"],
     ]
     add_table(doc, "Table A1. Repository evidence map.", ["Evidence", "Repository path"], appendix_rows, [3000, 6360], 9.4)
     doc.core_properties.title = "Beyond Big-O: Apple-Silicon Runtime Pilot Study"
