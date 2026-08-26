@@ -206,7 +206,7 @@ def build():
         "M2 MacBook Air with 8 GB memory and macOS 26.5.2. Four input sizes (1,000-25,000) were tested using three "
         "warm-ups and ten recorded repetitions, yielding 240 measurement records. At n = 25,000, median "
         "Python runtimes were 1.86-91.68 times the corresponding C++ medians across the twelve structure-operation "
-        "combinations; the upper end is submicrosecond and resolution-limited. Batched search and deletion exhibited "
+        "combinations; the upper end reflects a submicrosecond, resolution-limited C++ median. Batched search and deletion exhibited "
         "empirical scaling exponents near 1.85-2.00, since collection size and operation count both grew with n; hash "
         "workloads were closer to linear. All implementations produced identical search-hit counts and post-deletion "
         "checksums, including supplementary checks with a singly-linked std::forward_list and a third language, Java; "
@@ -260,8 +260,8 @@ def build():
         "An empirical test of whether the C++/Python linked-container mismatch inflates the observed language gap, rather than leaving that concern as an unverified caveat.",
         "A third-language check that re-runs the full workload under Java, testing whether the Python/C++ pattern generalises rather than leaving Java's absence as an unaddressed limitation.",
         "A calibrated-batching supplement that resolves the two resolution-limited C++ groups into stable, low-dispersion estimates, converting an open measurement caveat into a quantified one.",
-        "Peak-memory, coarse hardware-counter and second-input-distribution supplements that close four of the six original future-work items within a single Mac's reach.",
-        "An independent reproduction on a second, separately owned Windows machine, testing whether the primary Python/C++ comparison is an Apple Silicon artifact rather than leaving single-machine scope as an unaddressed limitation.",
+        "Peak-memory, coarse hardware-counter and second-input-distribution supplements that close four further items from the original future-work list within a single Mac's reach.",
+        "An independent reproduction on a second, separately owned Windows machine -- closing the fifth of the six original future-work items -- testing whether the primary Python/C++ comparison is an Apple Silicon artifact rather than leaving single-machine scope as an unaddressed limitation.",
     ):
         para(doc, text, style="11_Bullet List")
 
@@ -499,7 +499,7 @@ def build():
         "agreed within roughly 20% between the two distributions for C++ and Python at every structure, supporting "
         "the external validity of those findings beyond the one distribution used throughout the rest of the paper. "
         "Insertion did not: C++ insertion differed by more than 20% in both directions across all three structures "
-        "(Table below), a pattern reproduced across three independent process invocations for the array case and "
+        "(Table VIII), a pattern reproduced across three independent process invocations for the array case and "
         "therefore not attributable to single-run noise. This is not explained by the study's timing-boundary "
         "design, since dataset parsing is explicitly excluded from the timed region; root-causing it, for example "
         "by checking allocator or page-fault behaviour under each build order, is left for future work. Java's "
@@ -619,9 +619,11 @@ def build():
     p.add_run("Generative AI Use: ").bold = True
     p.add_run(
         "Generative AI (Codex/Claude) assisted with repository scaffolding, code review, execution orchestration, "
-        "analysis scripting and manuscript drafting. All numerical claims were generated programmatically from the "
-        "preserved raw CSV; no measurements were fabricated. The named authors independently verified the code, "
-        "results, citations and wording, and take full responsibility for the content."
+        "analysis scripting and manuscript drafting, including the independent Windows reproduction supplement "
+        "(Section IV-I), which was executed by the second author on his own machine, not by the AI assistant. All "
+        "numerical claims were generated programmatically from the preserved raw CSV; no measurements were "
+        "fabricated. Before submission, the named authors must independently verify the code, results, citations "
+        "and wording, and take full responsibility for the content."
     )
 
     para(doc, "References", style="Heading 5")
