@@ -221,6 +221,21 @@ def build():
     para(doc, abstract, style="03_Abstract")
     para(doc, "Keywords—data structures; Big-O; empirical algorithmics; Python; C++; Java; microbenchmarking; reproducibility; construct validity", style="04_Keywords")
 
+    # Unnumbered, like Acknowledgment/Declarations -- inserting this as a
+    # numbered Heading 1 would shift every later Roman-numeral/lettered
+    # cross-reference (Section IV-F, VI-B, ...) hardcoded throughout this file.
+    para(doc, "Plain-Language Summary", style="Heading 5")
+    para(doc, "The rest of this paper is written for a computer science audience. This section explains the same findings in everyday language.", style="Body Text")
+    for text in (
+        "The \"speed rules\" taught in computer science classes turned out to be accurate: searching and deleting got slower in exactly the pattern theory predicts as the data grew, and hash-table lookups stayed fast.",
+        "C++ was consistently faster than Python, but not by one fixed number -- how much faster depended heavily on the specific task.",
+        "Java held a surprise: on 4 of the 12 tasks tested, it was actually slower than Python, and its speed bounced around from run to run far more than Python's or C++'s did.",
+        "A few C++ operations finished faster than the computer's own stopwatch could reliably measure. Running each one thousands of times in a row and averaging the result solved this.",
+        "The most interesting new discovery: for almost every operation, it did not matter whether the data started out shuffled or already sorted -- the speed was about the same either way. The one exception was inserting data into a C++ container, where the speed changed noticeably depending on the input order, and the reason is not yet known. That is reported honestly as an open question rather than guessed at.",
+        "Two things are left for a follow-up study: testing this on a second, different computer, and taking more detailed processor-level measurements. Both need equipment beyond the single laptop used here.",
+    ):
+        para(doc, text, style="11_Bullet List")
+
     # I. INTRODUCTION
     para(doc, "Introduction", style="Heading 1")
     para(doc, f"Big-O notation provides a machine-independent description of growth as input size increases. It is indispensable for algorithm design, yet it intentionally suppresses constant factors, representation costs and hardware effects [{REF['cormen']}]. Consequently, two implementations with the same asymptotic class can differ substantially in observed runtime, while a theoretically favourable structure may carry a higher construction or traversal cost for a particular workload.", style="Body Text")

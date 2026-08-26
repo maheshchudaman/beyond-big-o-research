@@ -350,6 +350,15 @@ def build():
     add_para(doc, abstract, align=WD_ALIGN_PARAGRAPH.JUSTIFY)
     add_rich_para(doc, [("Keywords: ", {"bold": True}), ("data structures; Big-O; empirical algorithmics; Python; C++; Java; microbenchmarking; reproducibility; construct validity", {})], align=WD_ALIGN_PARAGRAPH.LEFT)
 
+    heading(doc, "Plain-Language Summary", 1)
+    add_para(doc, "The rest of this paper is written for a computer science audience. This section explains the same findings in everyday language.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
+    bullet(doc, "The \"speed rules\" taught in computer science classes turned out to be accurate: searching and deleting got slower in exactly the pattern theory predicts as the data grew, and hash-table lookups stayed fast.")
+    bullet(doc, "C++ was consistently faster than Python, but not by one fixed number -- how much faster depended heavily on the specific task.")
+    bullet(doc, "Java held a surprise: on 4 of the 12 tasks tested, it was actually slower than Python, and its speed bounced around from run to run far more than Python's or C++'s did.")
+    bullet(doc, "A few C++ operations finished faster than the computer's own stopwatch could reliably measure. Running each one thousands of times in a row and averaging the result solved this.")
+    bullet(doc, "The most interesting new discovery: for almost every operation, it did not matter whether the data started out shuffled or already sorted -- the speed was about the same either way. The one exception was inserting data into a C++ container, where the speed changed noticeably depending on the input order, and the reason is not yet known. That is reported honestly as an open question rather than guessed at.")
+    bullet(doc, "Two things are left for a follow-up study: testing this on a second, different computer, and taking more detailed processor-level measurements. Both need equipment beyond the single laptop used here.")
+
     heading(doc, "1. Introduction", 1)
     add_para(doc, f"Big-O notation provides a machine-independent description of growth as input size increases. It is indispensable for algorithm design, yet it intentionally suppresses constant factors, representation costs and hardware effects [{REF['cormen']}]. Consequently, two implementations with the same asymptotic class can differ substantially in observed runtime, while a theoretically favourable structure may carry a higher construction or traversal cost for a particular workload.", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
     add_para(doc, f"This distinction is especially important in undergraduate computing education. Students often learn that hash-table lookup is expected O(1), array search is O(n), and linked-list traversal is O(n), but they may not observe how language runtimes, boxed objects, allocation strategies and contiguous memory influence actual measurements. Computer architecture texts likewise emphasise that locality and the memory hierarchy shape performance beyond instruction counts [{REF['hennessy']}].", align=WD_ALIGN_PARAGRAPH.JUSTIFY)
