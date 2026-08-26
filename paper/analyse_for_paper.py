@@ -18,6 +18,7 @@ from PIL import Image, ImageDraw, ImageFont
 ROOT = Path(__file__).resolve().parents[1]
 RAW = ROOT / "results/raw/combined.csv"
 LINKED_FWD_RAW = ROOT / "results/raw/cpp_linked_fwd_combined.csv"
+JAVA_RAW = ROOT / "results/raw/java_combined.csv"
 OUT = ROOT / "paper/generated"
 OPERATIONS = ("insert", "search", "delete", "traverse")
 STRUCTURES = ("array", "linked", "hash")
@@ -118,7 +119,59 @@ def write_linked_fwd_supplement(main_rows, main_groups, fwd_rows, fwd_groups):
     return supplement
 
 
-def write_metrics(rows, groups, fwd_rows, fwd_groups):
+def read_java_groups():
+    rows = list(csv.DictReader(JAVA_RAW.open(newline="", encoding="utf-8")))
+    groups: dict[tuple[str, int, str], list[int]] = defaultdict(list)
+    for row in rows:
+        for operation in OPERATIONS:
+            groups[(row["structure"], int(row["n"]), operation)].append(int(row[f"{operation}_ns"]))
+    return rows, groups
+
+
+def write_java_supplement(main_rows, main_groups, java_rows, java_groups):
+    """External-validity check: the primary study only executed Python and C++;
+    Java (OpenJDK 26, satisfies the >=17 requirement) was re-run across all three
+    structures and four sizes with the identical protocol to test whether the
+    Python/C++ pattern generalises to a third, managed-runtime language (see
+    Section 6.3)."""
+    reference = {
+        (row["structure"], int(row["n"])): (row["hits"], row["checksum"])
+        for row in main_rows
+        if row["language"] == "python"
+    }
+    for row in java_rows:
+        key = (row["structure"], int(row["n"]))
+        expected = reference[key]
+        assert (row["hits"], row["checksum"]) == expected, (
+            f"Java correctness mismatch at {key}: got {(row['hits'], row['checksum'])}, expected {expected}"
+        )
+    supplement = {
+        "record_count": len(java_rows),
+        "raw_sha256": hashlib.sha256(JAVA_RAW.read_bytes()).hexdigest(),
+        "java_version": "OpenJDK 26.0.2.1 (Homebrew)",
+        "n25000": {},
+        "scaling_exponents_5000_25000": {},
+    }
+    for structure in STRUCTURES:
+        supplement["n25000"][structure] = {}
+        supplement["scaling_exponents_5000_25000"][structure] = {}
+        for operation in OPERATIONS:
+            cpp_median = statistics.median(main_groups[("cpp", structure, 25000, operation)])
+            python_median = statistics.median(main_groups[("python", structure, 25000, operation)])
+            java_median = statistics.median(java_groups[(structure, 25000, operation)])
+            supplement["n25000"][structure][operation] = {
+                "cpp_median_ms": cpp_median / 1_000_000,
+                "python_median_ms": python_median / 1_000_000,
+                "java_median_ms": java_median / 1_000_000,
+                "java_to_cpp_ratio": java_median / cpp_median,
+                "python_to_java_ratio": python_median / java_median,
+            }
+            y1 = statistics.median(java_groups[(structure, 5000, operation)])
+            supplement["scaling_exponents_5000_25000"][structure][operation] = scaling_exponent(y1, java_median)
+    return supplement
+
+
+def write_metrics(rows, groups, fwd_rows, fwd_groups, java_rows, java_groups):
     metrics = {
         "record_count": len(rows),
         "raw_sha256": hashlib.sha256(RAW.read_bytes()).hexdigest(),
@@ -171,6 +224,7 @@ def write_metrics(rows, groups, fwd_rows, fwd_groups):
     metrics["max_group_cv"] = max(all_cvs)
     metrics["language_ratio_range_n25000"] = [min(x[2] for x in ratios), max(x[2] for x in ratios)]
     metrics["linked_fwd_supplement"] = write_linked_fwd_supplement(rows, groups, fwd_rows, fwd_groups)
+    metrics["java_supplement"] = write_java_supplement(rows, groups, java_rows, java_groups)
     (OUT / "paper_metrics.json").write_text(json.dumps(metrics, indent=2) + "\n", encoding="utf-8")
     with (OUT / "n25000_medians.csv").open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=table_rows[0].keys())
@@ -255,7 +309,8 @@ def main():
     OUT.mkdir(parents=True, exist_ok=True)
     rows, groups = read_groups()
     fwd_rows, fwd_groups = read_linked_fwd_groups()
-    metrics, ratios = write_metrics(rows, groups, fwd_rows, fwd_groups)
+    java_rows, java_groups = read_java_groups()
+    metrics, ratios = write_metrics(rows, groups, fwd_rows, fwd_groups, java_rows, java_groups)
     draw_search_scaling(groups)
     draw_language_ratios(ratios)
     print(json.dumps({

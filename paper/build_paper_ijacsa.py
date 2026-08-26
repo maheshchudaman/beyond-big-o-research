@@ -210,15 +210,15 @@ def build():
         "rather than a stable absolute figure. Batched search and deletion for sequential structures exhibited "
         "empirical scaling exponents of approximately 1.85-2.00 because both the collection size and the number of "
         "operations increased with n; hash workloads were closer to linear. All implementations produced identical "
-        "search-hit counts and post-deletion checksums, including a supplementary re-run of the linked benchmark "
-        "using a singly-linked std::forward_list to match the Python implementation's representation, which "
-        "reproduced the same pattern of ratios rather than narrowing it. The findings support teaching Big-O together "
-        "with implementation-aware measurement, while the single-machine scope, absence of Java and hardware-counter "
-        "data, and submicrosecond C++ measurements make the work a pilot rather than a final general-purpose "
-        "benchmark."
+        "search-hit counts and post-deletion checksums, including supplementary checks that re-ran the linked "
+        "benchmark with a singly-linked std::forward_list and added Java as a third language; both reproduced the "
+        "same overall pattern, with Java ratios to C++ ranging from 0.41x to 109.78x rather than sitting uniformly "
+        "between Python and C++. The findings support teaching Big-O together with implementation-aware measurement, "
+        "while the single-machine scope, absence of hardware-counter data, and submicrosecond C++ measurements make "
+        "the work a pilot rather than a final general-purpose benchmark."
     )
     para(doc, abstract, style="03_Abstract")
-    para(doc, "Keywords—data structures; Big-O; empirical algorithmics; Python; C++; microbenchmarking; reproducibility; construct validity", style="04_Keywords")
+    para(doc, "Keywords—data structures; Big-O; empirical algorithmics; Python; C++; Java; microbenchmarking; reproducibility; construct validity", style="04_Keywords")
 
     # I. INTRODUCTION
     para(doc, "Introduction", style="Heading 1")
@@ -241,6 +241,7 @@ def build():
         "An empirical distinction between per-operation complexity and the complexity of a batch whose operation count also grows with n.",
         "A transparent account of measurement-resolution, implementation-equivalence and external-validity limitations.",
         "An empirical test of whether the C++/Python linked-container mismatch inflates the observed language gap, rather than leaving that concern as an unverified caveat.",
+        "A third-language check that re-runs the full workload under Java, testing whether the Python/C++ pattern generalises rather than leaving Java's absence as an unaddressed limitation.",
     ):
         para(doc, text, style="11_Bullet List")
 
@@ -340,6 +341,38 @@ def build():
     new_section(doc, cols=2)
     para(doc, f"Matching the C++ container's linkage discipline to the Python implementation did not narrow the measured language gap. The Python-to-C++ ratio was higher under the forward_list comparison than under std::list for search ({fwd['search']['python_to_forward_list_ratio']:.2f}x versus {fwd['search']['python_to_list_ratio']:.2f}x), deletion ({fwd['delete']['python_to_forward_list_ratio']:.2f}x versus {fwd['delete']['python_to_list_ratio']:.2f}x) and traversal ({fwd['traverse']['python_to_forward_list_ratio']:.2f}x versus {fwd['traverse']['python_to_list_ratio']:.2f}x), and only slightly lower for insertion ({fwd['insert']['python_to_forward_list_ratio']:.2f}x versus {fwd['insert']['python_to_list_ratio']:.2f}x). The construct-validity concern therefore does not appear to be inflating the reported Python/C++ ratios for the linked condition.", style="Body Text")
 
+    para(doc, "External-Validity Check: Adding Java as a Third Language", style="Heading 2")
+    java_sup = METRICS["java_supplement"]
+    para(doc, f"Section VI-C notes that Java was not executed in the primary study because no working JDK was available. To test whether the reported Python/C++ pattern generalises to a third, managed-runtime language, the Java benchmark already scaffolded in the repository was compiled and run under {java_sup['java_version']} across all three structures and four input sizes with the identical protocol, on 25 August 2026. Every Java run reproduced the same search-hit count and post-deletion checksum as the corresponding Python and C++ runs at every input size.", style="Body Text")
+    java_rows = []
+    for structure in ("array", "linked", "hash"):
+        for operation in ("insert", "search", "delete", "traverse"):
+            entry = java_sup["n25000"][structure][operation]
+            java_rows.append([
+                structure.title(), operation.title(), fmt_ms(entry["cpp_median_ms"]),
+                fmt_ms(entry["python_median_ms"]), fmt_ms(entry["java_median_ms"]),
+                f"{entry['java_to_cpp_ratio']:.2f}x",
+            ])
+    new_section(doc, cols=1)
+    add_table(doc, "Median workload runtime at n = 25,000 including Java (ten repetitions).", ["Structure", "Operation", "C++17", "Python 3.13", "Java", "Java/C++"], java_rows, [1.0, 1.0, 1.1, 1.1, 1.0, 1.0])
+    new_section(doc, cols=2)
+    para(
+        doc,
+        "Java's ratio to C++ was operation-dependent rather than uniformly intermediate between the interpreted and "
+        "compiled extremes, ranging from 0.41x (linked insertion, where Java's median was faster than C++'s) to "
+        "109.78x (array traversal) across the twelve structure-operation combinations, a wider spread than the "
+        "Python/C++ range for the same combinations. Two results run against the intuition that a JIT-compiled "
+        "language should sit strictly between interpreted Python and compiled C++: Java's array-traversal median "
+        "(0.105 ms) was slower than Python's (0.088 ms), plausibly reflecting boxed-Integer ArrayList iteration "
+        "overhead; and Java's hash-traversal median (0.450 ms) was roughly four times slower than Python's "
+        "(0.109 ms), even though Java outperformed Python on hash search and delete by a comparable margin, "
+        "consistent with boxed-Long iteration cost in the reference HashMap implementation rather than a general JVM "
+        "weakness. These results reinforce the paper's central methodological point: coarse language-level "
+        "generalisations do not hold uniformly across operations, and only workload-level measurement exposes where "
+        "they break down.",
+        style="Body Text",
+    )
+
     # V. DISCUSSION
     para(doc, "Discussion", style="Heading 1")
     para(doc, "Big-O Explained, Not Contradicted", style="Heading 2")
@@ -360,12 +393,12 @@ def build():
     para(doc, "The structures are functionally comparable but not internally identical. Python's custom singly linked list differs from C++ std::list, which is typically doubly linked. Python list holds object references, whereas std::vector<int> stores primitive integers contiguously. Consequently, the experiment evaluates idiomatic implementation conditions rather than isolating a pure language effect. This concern is tested empirically in Section IV-E, which reruns the C++ linked benchmark with the singly-linked std::forward_list; the resulting ratios do not shrink under the more closely matched comparison. Peak memory and cache behaviour were proposed in the broader project but were not measured on this Mac and are not inferred in this paper.", style="Body Text")
 
     para(doc, "External and Conclusion Validity", style="Heading 2")
-    para(doc, "One Apple M2 laptop, one Python version and one C++ toolchain cannot represent other processors, operating systems, compilers or runtime configurations. Only four sizes and one random-input family were examined. Ten repetitions support descriptive stability but not broad population inference. Java was not executed because no working JDK was available. The conclusions are therefore restricted to this environment and protocol.", style="Body Text")
+    para(doc, "One Apple M2 laptop, one Python version and one C++ toolchain cannot represent other processors, operating systems, compilers or runtime configurations. Only four sizes and one random-input family were examined. Ten repetitions support descriptive stability but not broad population inference. Java was not executed in the primary 23 August 2026 session because no working JDK was available; Section IV-F reports a supplementary Java run added on 25 August 2026 using a subsequently installed JDK on the same machine, so that check still shares this section's single-machine limitation. The conclusions are therefore restricted to this environment and protocol.", style="Body Text")
 
     # VII. CONCLUSION
     para(doc, "Conclusion and Future Work", style="Heading 1")
-    para(doc, "This reproducible Mac pilot showed that theoretical growth and observed runtime can be taught together. Sequential search and deletion batches grew close to quadratically when both collection size and operation count increased, while hash batches grew close to linearly. Python and C++ showed substantial but operation-dependent runtime differences, and all correctness outputs agreed. The study also exposed a measurement weakness: several optimized C++ workloads were too short for reliable single-shot timing.", style="Body Text")
-    para(doc, "Before journal submission, the benchmark should use calibrated operation batching, add Java 17, collect peak resident memory and hardware cache counters on a controlled Linux machine, record temperature and power mode, test additional input distributions, and reproduce the experiment on at least one independent system. Those extensions should be reported as new evidence, not combined silently with the present Mac data.", style="Body Text")
+    para(doc, "This reproducible Mac pilot showed that theoretical growth and observed runtime can be taught together. Sequential search and deletion batches grew close to quadratically when both collection size and operation count increased, while hash batches grew close to linearly. Python and C++ showed substantial but operation-dependent runtime differences, and all correctness outputs agreed. A supplementary Java run showed that a JIT-compiled, managed-runtime language does not sit uniformly between the interpreted and compiled extremes: it was faster than C++ for linked insertion and slower than Python for two of the twelve structure-operation combinations. The study also exposed a measurement weakness: several optimized C++ workloads were too short for reliable single-shot timing.", style="Body Text")
+    para(doc, "Before journal submission, the benchmark should use calibrated operation batching, collect peak resident memory and hardware cache counters on a controlled Linux machine, record temperature and power mode, test additional input distributions, and reproduce the experiment on at least one independent system. The Java results in Section IV-F address the language-coverage gap but not the single-machine, single-session limitation; a full three-language run alongside a second machine remains future work. Those extensions should be reported as new evidence, not combined silently with the present Mac data.", style="Body Text")
 
     # Component heads (unnumbered)
     para(doc, "Acknowledgment", style="Heading 5")
@@ -381,11 +414,13 @@ def build():
     p = para(doc, style="Body Text")
     p.add_run("Data and Code Availability: ").bold = True
     p.add_run(
-        f"The repository contains the dataset generator, Python and C++ implementations, Java source, validation "
+        f"The repository contains the dataset generator, Python, C++ and Java implementations, validation "
         f"tests, execution configuration, raw CSV records and analysis scripts. The raw combined CSV contains "
         f"{METRICS['record_count']} records (SHA-256: {METRICS['raw_sha256']}); the supplementary construct-validity "
         f"check adds {METRICS['linked_fwd_supplement']['record_count']} further records (SHA-256: "
-        f"{METRICS['linked_fwd_supplement']['raw_sha256']}). The repository is publicly available at "
+        f"{METRICS['linked_fwd_supplement']['raw_sha256']}), and the supplementary Java run adds "
+        f"{METRICS['java_supplement']['record_count']} further records (SHA-256: "
+        f"{METRICS['java_supplement']['raw_sha256']}). The repository is publicly available at "
         f"https://github.com/maheshchudaman/beyond-big-o-research and is archived on Zenodo with concept DOI "
         f"10.5281/zenodo.22089928."
     )

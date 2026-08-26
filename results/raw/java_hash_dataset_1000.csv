@@ -1,0 +1,11 @@
+language,structure,dataset,n,repeat,insert_ns,search_ns,delete_ns,traverse_ns,hits,checksum
+java,hash,dataset_1000.txt,1000,0,77041,2041,2875,48958,5,494272
+java,hash,dataset_1000.txt,1000,1,68500,2666,3333,63125,5,494272
+java,hash,dataset_1000.txt,1000,2,147625,2916,3542,61166,5,494272
+java,hash,dataset_1000.txt,1000,3,85250,2500,2625,59583,5,494272
+java,hash,dataset_1000.txt,1000,4,80125,2042,2833,53458,5,494272
+java,hash,dataset_1000.txt,1000,5,67084,1875,2875,54041,5,494272
+java,hash,dataset_1000.txt,1000,6,69959,2125,2833,55000,5,494272
+java,hash,dataset_1000.txt,1000,7,78833,2708,3375,54083,5,494272
+java,hash,dataset_1000.txt,1000,8,72500,2042,2916,53250,5,494272
+java,hash,dataset_1000.txt,1000,9,68291,2916,3875,53750,5,494272
