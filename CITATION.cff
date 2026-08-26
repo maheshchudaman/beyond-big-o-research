@@ -5,8 +5,8 @@ type: software
 authors:
   - family-names: Patil
     given-names: Mahesh
-version: 0.1.9
-date-released: 2026-08-25
+version: 0.1.10
+date-released: 2026-08-26
 license: MIT
 repository-code: "https://github.com/maheshchudaman/beyond-big-o-research"
 doi: 10.5281/zenodo.22089928
